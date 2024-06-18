@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>mdoc</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="mdoc_files/libs/clipboard/clipboard.min.js"></script>
+<script src="mdoc_files/libs/quarto-html/quarto.js"></script>
+<script src="mdoc_files/libs/quarto-html/popper.min.js"></script>
+<script src="mdoc_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="mdoc_files/libs/quarto-html/anchor.min.js"></script>
+<link href="mdoc_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="mdoc_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="mdoc_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="mdoc_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="mdoc_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="sec:intro" class="level1">
+<h1>Introduction</h1>
+</section>
+<section id="sec:basics" class="level1">
+<h1>The Basics</h1>
+<p>While standard regression techniques allow the researcher to determine the effect of covariates <span class="math inline">\(X\)</span> on the expected value of a response variable <span class="math inline">\(Y\)</span>, regression quantiles are capable of characterizing how changes in <span class="math inline">\(X\)</span> affect the entire distribution of <span class="math inline">\(Y\)</span>. In applied research, this may be useful when one seeks to determine how does a given percentile of the distribution of interest respond to changing values of explanatory variables. For example, consider the effects of smoking on birth weight, as <span class="citation" data-cites="abrevaya2008">[@abrevaya2008]</span> studied in the context of quantile regression. Instead of fixing an <em>unconditional threshold</em> so as to divide the sample in low birth weights and non-low birth weights, the authors followed a <em>conditional quantile</em> approach that enabled them to study the effects of birth inputs (e.g.&nbsp;smoking) in different parts of the birth weight distribution (<span class="citation" data-cites="abrevaya2008">[@abrevaya2008]</span>).</p>
+<p>In its more common setting, quantile regressions are assumed to follow a linear form:</p>
+<p><span class="math display">\[\label{basic_qtile}
+    Q_{\tau}(Y | X) =  X \beta(\tau)\]</span></p>
+<p>Such that, while the parameters of interest change across quantiles, the effects of covariates <span class="math inline">\(X\)</span> on the <span class="math inline">\(\tau\)</span>-th quantile of <span class="math inline">\(Y\)</span> are assumed to be linear.</p>
+<p>In addition to heterogeneous effects of explanatory variables on the outcome of interest, the researcher might be interested as well in properly addressing the problem of unobserved heterogeneity. Returning to the example of birth weights, it may be the case that unobservable characteristics of the mother are correlated with both the birth outcome and birth inputs, such as her smoking status during pregnancy or whether she attended prenatal care visits (<span class="citation" data-cites="abrevaya2008">[@abrevaya2008]</span>). In this case, a panel data approach may be useful for obtaining causal estimates of the effects of explanatory variables on quantiles of <span class="math inline">\(Y\)</span>.</p>
+<p>At the same time, panel data models with unobserved time-invariant effects depend upon demeaning techniques to eliminate such effects and yield consistent estimators of the parameters of interest. However, differentiating out individual effects is not a feasible approach within the context of regression quantiles, the reason being that quantiles are <em>not</em> linear operators. Many authors, for example <span class="citation" data-cites="abrevaya2008">[@abrevaya2008]</span>, <span class="citation" data-cites="canay2011">[@canay2011]</span> or <span class="citation" data-cites="mss2019">[@mss2019]</span> have stated that this key limitation has prevented further progress in the estimation of regression quantiles with fixed effects.</p>
+<p>In this paper, we review four estimators for regression quantiles in the presence of fixed effects. All of them are relatively simple to implement with our provided commands for Stata (see sections <a href="#sec:cre" data-reference-type="ref" data-reference="sec:cre">3</a>, <a href="#sec:canay" data-reference-type="ref" data-reference="sec:canay">4</a> and <a href="#sec:mmqreg" data-reference-type="ref" data-reference="sec:mmqreg">5</a> below). However, this easiness comes at the cost of making important assumptions regarding, among others, the data generating process (DGP) and the effect of unobserved heterogeneity <span class="math inline">\(\alpha_i\)</span> on the distribution of <span class="math inline">\(Y\)</span>. The following sections describe each of the estimators, their key assumptions and provide examples for their implementation in Stata.</p>
+</section>
+<section id="sec:cre" class="level1">
+<h1>Correlated Random Effects</h1>
+<p>This estimator, described by <span class="citation" data-cites="wooldridge2010">[@wooldridge2010]</span>, rests upon the Mundlak repsesentation of a Correlated Random Effects (CRE) model for the estimation of regression quantiles with panel data. The underlying DGP for the outcome of interest <span class="math inline">\(Y_{it}\)</span> is:</p>
+<p><span class="math display">\[\label{eq:dgp_cre}
+    Y_{it} = X_{it}' \beta + \alpha_i + u_{it}\]</span></p>
+<p>where <span class="math inline">\(\alpha_i\)</span> is the time-invariant individual effect and can be described in terms of <span class="math inline">\(X_i \equiv (X_{i1},...,X_{iT})\)</span> as follows:</p>
+<p><span class="math display">\[\label{eq:mundlak_rep}
+    \alpha_i = \psi + \Bar{X_i}' \lambda + v_i\]</span></p>
+<p>where <span class="math inline">\(\Bar{X_i}\)</span> denotes the time average of characteristics across individuals. Then, the conditional <span class="math inline">\(\tau\)</span>-th quantile of <span class="math inline">\(Y_{it}\)</span> is:</p>
+<p><span class="math display">\[\label{eq:qr_cre}
+    Q_{\tau}(Y_{it} | X_i) = \psi + X_{it}' \beta + \Bar{X_i}' \lambda + Q_{\tau}(a_{it} | X_i)\]</span></p>
+<p>where <span class="math inline">\(a_{it} \equiv v_i + u_{it}\)</span> is the composite error. The CRE estimator using the Mundlak representation imposes the following key assumption:</p>
+<p><span class="math display">\[\begin{gathered}
+    \text{CRE1.\quad $a_{it}$ is independent of $X_i$.}\label{eq:cre1}
+    %\text{CRE1.}\quad v_i\; \text{is independent of}\; X_i \label{eq:cre1} \\
+    %\text{CRE2.}\quad Q_{\tau}(u_{it} | X_i, v_i) = Q_{\tau}(u_{it} | X_{it}) \label{eq:cre2}
+\end{gathered}\]</span></p>
+<p>Stringent as may be, this assumption allows to consistently estimate <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\lambda\)</span> from a pooled quantile regression of <span class="math inline">\(Y_{it}\)</span> on <span class="math inline">\(X_{it}\)</span> and <span class="math inline">\(\Bar{X_{i}}\)</span>. As <span class="citation" data-cites="wooldridge2010">[@wooldridge2010]</span> remarks, CRE1 amounts to assuming that quantile functions are parallel or, in other words, that by imposing a relationship between <span class="math inline">\(X_{i}\)</span> and <span class="math inline">\(\alpha_i\)</span> of the form displayed in equation <a href="#eq:mundlak_rep" data-reference-type="ref" data-reference="eq:mundlak_rep">[eq:mundlak_rep]</a> we can only estimate the location shifts of quantile regressions. As it will be shown below, this is a feature the CRE estimator shares with Canay’s method (see section <a href="#sec:canay" data-reference-type="ref" data-reference="sec:canay">4</a>) for estimating regression quantiles in a panel data context. Both estimators are constrained in the sense that only location effects on quantile functions are accounted for, whereas the MMQREG method (see section <a href="#sec:mmqreg" data-reference-type="ref" data-reference="sec:mmqreg">5</a>) has the ability to estimate quantile coefficients that take into account both location and scale effects.</p>
+<p><span class="citation" data-cites="abrevaya2008">[@abrevaya2008]</span> develop an alternative CRE estimator for regression quantiles with panel data drawing on the model of <span class="citation" data-cites="chamberlain1982">[@chamberlain1982]</span>. However, its implementation is severely restricted because Abrevaya and Dahl’s estimator regresses <span class="math inline">\(Y_{it}\)</span> on <span class="math inline">\(X_{it}\)</span> and <span class="math inline">\(X_{i}\)</span> for a given <span class="math inline">\(\tau\)</span>. Even if we have a balanced panel available for our application, we will have to deal with the large quantity of regressors included in the equation [<span class="math inline">\(K(1+T)\)</span>] and its corresponding loss of degrees of freedom for statistical inference.</p>
+<p>Introduction of multiple fixed effects in this setting is straightforward. First, modify equation <a href="#eq:dgp_cre" data-reference-type="ref" data-reference="eq:dgp_cre">[eq:dgp_cre]</a> so as to include two or more sets of fixed effects (<span class="math inline">\(\alpha^1, \alpha^2, ..., \alpha^k\)</span>) and proceed by computing the averages of explanatory variables <span class="math inline">\(X\)</span> with respect to the variable identifying the fixed effect. Finally, run a regression of <span class="math inline">\(Y\)</span> on the set of original control variables and the averages just calculated. In terms of the quantile function, equation <a href="#eq:qr_cre" data-reference-type="ref" data-reference="eq:qr_cre">[eq:qr_cre]</a> requires to be modified accordingly:</p>
+<p><span class="math display">\[\label{eq:qr_cre_twoway}
+    Q_{\tau}(Y_{it} | X_i) = \Psi + X_{it}' \beta + \Bar{X^1_i}' \lambda^1 + \Bar{X^2_i}' \lambda^2 + Q_{\tau}(a_{it} | X_i)\]</span></p>
+<p>For the case of twoway fixed effects and where <span class="math inline">\(\Psi \equiv \psi^1 + \psi^2\)</span>.</p>
+<p>Implementation of the CRE estimator for quantile regression in Stata can be done with the command <code>cre</code>, which is actually a prefix for the estimation of CRE models. Option <code>[abs(</code><em><code>varlist</code></em><code>)]</code> is used to provide the command with variables identifying groups of observations that will be subsequently used to estimate the fixed effects. By default, singleton groups are dropped from the estimation. Now, we present an application of the CRE estimator for regression quantiles with multiple fixed effects using the aforementioned command. Note that the same dataset will be used for all estimation methods surveyed in this paper, so it will be worth to outline the main features of the data before proceeding to display, comment and compare the estimation results.</p>
+<p>We use the panel from <span class="citation" data-cites="persson2007">[@persson2007]</span> who study the effect of alternative types of government on its overall spending in the last year of the legislature. The authors consider both coalition and single-party as government types, leaving out from consideration minority governments. Here, we will only focus on the relationship a coalition government has with its overall spending and expand <span class="citation" data-cites="persson2007">[@persson2007]</span> results by estimating the .25, .5 and .75 quantiles of the government spending distribution.</p>
+<p>Variables used for estimation include central government spending as percentage of GDP in the last year of legislature (<em>last_exp</em>), an indicator variable for coalition governments (<em>coalition</em>), population size in log scale (<em>lpop</em>), the percentage of population over 65 years of age (<em>prop65</em>), the log-deviation of output from the country trend (<em>ygap</em>) and the length (in years) of the legislature (<em>length</em>). Both country and period fixed effects are included in our estimations, in the same fashion as <span class="citation" data-cites="persson2007">[@persson2007]</span>.</p>
+<div id="tab:cre_results">
+<table class="table">
+<caption>Government spending and coalition government - CRE Estimator</caption>
+<colgroup>
+<col style="width: 65%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>VARIABLES</td>
+<td style="text-align: center;">(1) 25th quantile</td>
+<td style="text-align: center;">(2) 50th quantile</td>
+<td style="text-align: center;">(3) 75th quantile</td>
+</tr>
+<tr class="even">
+<td>coalition</td>
+<td style="text-align: center;">1.629 (1.370) 0.227 (0.150) -14.01 (9.392) 0.239 (0.603) -0.380* (0.211) -0.242 (0.533) 245.0 (152.7)</td>
+<td style="text-align: center;">2.182 (1.567) 0.110 (0.177) -13.90 (11.52) 1.008 (0.773) -0.538* (0.300) 0.373 (0.423) 238.1 (189.4)</td>
+<td style="text-align: center;">1.423 (1.662) 0.167 (0.261) -18.10 (20.32) 0.709 (0.912) -0.574 (0.407) 0.00656 (0.481) 309.8 (331.5)</td>
+</tr>
+<tr class="odd">
+<td>Observations Country FE Period FE Bootstrapped Standard errors in parentheses *** p<span class="math inline">\(&lt;\)</span><!-- -->0.01, ** p<span class="math inline">\(&lt;\)</span><!-- -->0.05, * p<span class="math inline">\(&lt;\)</span><!-- -->0.1 Mean (across FE) coefficients of independent variables are omitted.</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span id="tab:cre_results" label="tab:cre_results"></span></p>
+<p>Estimation results from <span class="citation" data-cites="persson2007">[@persson2007]</span> dataset using the CRE estimator for quantile regression are displayed in table <a href="#tab:cre_results" data-reference-type="ref" data-reference="tab:cre_results">1</a> and show heterogeneous effects of a permanent switch from a single-party to a coalition government on government spending. The largest effect is obtained at the median of the distribution, and the estimated coefficient is close to the one <span class="citation" data-cites="persson2007">[@persson2007]</span> computed using the within estimator (2.36). At the lower and upper quartile of the distribution we still find positive coefficients, which support the theoretical predictions of the model developed by the same authors. However, none of the coefficients for coalition across quantiles are statistically different from zero. In the context of CRE estimation, this fact may be partly due to the loss of degrees of freeedom implied by the addition of 12 extra regressors to the equation. In general, CRE will add <span class="math inline">\(W \times K\)</span> explanatory variables, with <span class="math inline">\(W\)</span> being the number of fixed effects we are accounting for.</p>
+</section>
+<section id="sec:canay" class="level1">
+<h1>Canay (2011) Estimator</h1>
+<p>Canay’s estimator key assumption is that fixed effects are merely treated as location-shifters. That is, unobserved individual effects only change the distribution of the response variable in a parallel fashion. While this may be a rather strong assumption, it helps to consistently estimate the parameters of interest using a simple transformation of the data as detailed below <span class="citation" data-cites="canay2011">[@canay2011]</span>.</p>
+<p>The underlying DGP of <span class="math inline">\(Y_{it}\)</span> is:</p>
+<p><span class="math display">\[\label{eq:dgp_canay}
+    Y_{it} = X_{it}' \beta(u_{it}) + \alpha_i\]</span></p>
+<p>To consistently estimate the <span class="math inline">\(\beta_{\tau}\)</span> from the data, the following assumptions are in place:</p>
+<p><span class="math display">\[\begin{gathered}
+    \text{CANAY1. Conditional on $X_{it} = x$ the random variables $X_{it}$ and $\alpha$ are independent.} \\
+    \text{CANAY2. $U_{it}$ is independent of $X_i$ and $\alpha_i$, with $U_{it} \sim U[0,1]$} \\
+    \text{CANAY3. $\beta_{\mu} \equiv E[\beta(U_{it})]$. That is, $\beta_{\mu}$ exists.}
+\end{gathered}\]</span></p>
+<p>Start defining the following equation, which is simply a restatement of equation <a href="#eq:dgp_canay" data-reference-type="ref" data-reference="eq:dgp_canay">[eq:dgp_canay]</a>, as follows:</p>
+<p><span class="math display">\[\label{eq:canay_2.3}
+Y_{it} = X_{it}' \beta(\tau) + \alpha_i + e_{it}(\tau)\]</span></p>
+<p>Where <span class="math inline">\(e_{it}(\tau) \equiv X_{it}'[\beta(U_{it} - \beta(\tau)]\)</span>. Then, due to assumption CANAY2, in the above equation only <span class="math inline">\(\beta(\tau)\)</span> and <span class="math inline">\(e_{it}(\tau)\)</span> depend on <span class="math inline">\(\tau\)</span>. Next, write a conditional mean equation for <span class="math inline">\(Y_{it}\)</span> as the following:</p>
+<p><span class="math display">\[\label{eq:canay_meaneq}
+    Y_{it} = X_{it}' \beta_{\mu} + \alpha_i + u_{it}\]</span></p>
+<p>Where <span class="math inline">\(u_{it} \equiv X_{it}' [\beta(U_{it}) - \beta_{\mu}]\)</span>. Assumption CANAY3 allows us to write this kind of mean equation. Then, the two-step estimator due to <span class="citation" data-cites="canay2011">[@canay2011]</span> is defined next:</p>
+<p><em>Step 1.</em> Let <span class="math inline">\(\hat{\beta}_\mu\)</span> be a <span class="math inline">\(\sqrt{nT}\)</span>-consistent estimator of <span class="math inline">\(\beta_{\mu}\)</span>. Define <span class="math inline">\(\hat{\alpha}_i \equiv \mathbb{E}_T[Y_{it} - X'_{it}\hat{\beta}_{\mu}]\)</span>.</p>
+<p><em>Step 2.</em> Let <span class="math inline">\(\hat{Y}_{it} = Y_{it} - \hat{\alpha}_i\)</span> and define the two-step estimator as:</p>
+<p><span class="math display">\[\label{eq:qreg_canay}
+    \hat{\beta}(\tau) \equiv \min_{\beta \in \beta} \mathbb{E}_{nT} [\rho(\hat{Y}_{it} - X_{it}' \beta)]\]</span></p>
+<p>Where <span class="math inline">\(\rho(\cdot)\)</span> is the check function <span class="citation" data-cites="koenker1978">[@koenker1978]</span>, <span class="math inline">\(\mathbb{E}_{T}(\cdot) \equiv T^{-1} \sum_{t=1}^{T} (\cdot)\)</span> and <span class="math inline">\(\mathbb{E}_{nT}(\cdot) \equiv (nT)^{-1} \sum_{t=1}^{T} \sum_{i=1}^n(\cdot)\)</span>. <span class="citation" data-cites="canay2011">[@canay2011]</span> defines this estimator as “consistent and asymptotically normal". This stated, Canay’s estimator stands out for its simplicity: Step 1 may be conveniently restated as obtaining the known within estimator of <span class="math inline">\(\beta\)</span> and then subtracting the time-average residuals from the dependent variable. Next, using this simple transformation of the data, Step 2 tells us to obtain regression quantiles of <span class="math inline">\(\hat{Y}_{it}\)</span> that are guaranteed to be consistent, as long as key assumptions hold.</p>
+<p>It is important to remark that consistency of Canay’s estimator is obtained when <span class="math inline">\(T \rightarrow \infty\)</span> <span class="citation" data-cites="canay2011">[@canay2011]</span>. Thus, the estimator at hand may perform poorly in contexts of panels with few time periods. In addition to this, the key assumption of the approach relies on the fact that the <span class="math inline">\(\alpha_i\)</span>’s are pure location shifts: in other words, that the unobservable time-invariant characteristics grouped in <span class="math inline">\(\alpha_i\)</span> have coefficients that are constant across <span class="math inline">\(\tau\)</span> <span class="citation" data-cites="canay2011">[@canay2011]</span>. As <span class="citation" data-cites="mss2019">[@mss2019]</span> point out using simulated data, the estimator’s performance deteriorates as the DGP features fixed effects that alter the entire distribution of interest, not only its location.</p>
+<p>Regarding statistical inference, <span class="citation" data-cites="canay2011">[@canay2011]</span> provides a simple algorithm to obtain bootstrapped standard errors. The key in this procedure is to compute the two step estimator for each bootstrap sample, avoiding the mistake of just sampling from the transformed data <span class="math inline">\(\hat{Y}_{it}\)</span>. As <span class="citation" data-cites="canay2011">[@canay2011]</span> remarks, the algorithm should be such that it computes the first step estimators <span class="math inline">\(\hat{\beta}_{\mu}\)</span> and <span class="math inline">\(\hat{\alpha}_i\)</span> for each repetition.</p>
+<p>Finally, we propose a Modified Canay estimator in which, instead of subtracting out the estimated fixed effects <span class="math inline">\(\hat{\alpha}_i\)</span> from the dependent variable <span class="math inline">\(Y_{it}\)</span>, they are included as regressors in equation <a href="#eq:qreg_canay" data-reference-type="ref" data-reference="eq:qreg_canay">[eq:qreg_canay]</a>. In stark contrast to the CRE estimator (see section <a href="#sec:cre" data-reference-type="ref" data-reference="sec:cre">3</a>), the Modified Canay only adds <span class="math inline">\(W\)</span> variables to the estimation, which makes it preferable in contexts of a small sample size when our goal is to estimate only location shift effects. However, we must be aware of the fact that the requirement of <span class="math inline">\(T \rightarrow \infty\)</span> for consistency may not be met, especially for short panels.</p>
+<p>Describe the implementation in Stata here.</p>
+<div id="tab:canay_results">
+<table class="table">
+<caption>Government spending and coalition government - Canay Estimator</caption>
+<colgroup>
+<col style="width: 65%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>VARIABLES</td>
+<td style="text-align: center;">(1) 25th quantile</td>
+<td style="text-align: center;">(2) 50th quantile</td>
+<td style="text-align: center;">(3) 75th quantile</td>
+</tr>
+<tr class="even">
+<td>coalition</td>
+<td style="text-align: center;">2.142 (1.478) 0.235 (0.174) -10.75 (12.95) 0.902 (0.599) -0.494* (0.290) -0.0973 (0.414) 184.9 (212.3)</td>
+<td style="text-align: center;">2.319* (1.339) 0.258 (0.176) -10.75 (12.96) 0.910 (0.602) -0.430 (0.290) 0.103 (0.406) 184.8 (212.3)</td>
+<td style="text-align: center;">1.779 (1.391) 0.294* (0.178) -10.76 (12.97) 0.797 (0.588) -0.664** (0.333) 0.169 (0.418) 186.8 (212.6)</td>
+</tr>
+<tr class="odd">
+<td>Observations Country FE Period FE Bootstrapped Standard errors in parentheses *** p<span class="math inline">\(&lt;\)</span><!-- -->0.01, ** p<span class="math inline">\(&lt;\)</span><!-- -->0.05, * p<span class="math inline">\(&lt;\)</span><!-- -->0.1</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span id="tab:canay_results" label="tab:canay_results"></span></p>
+<p>Tables <a href="#tab:canay_results" data-reference-type="ref" data-reference="tab:canay_results">2</a> and <a href="#tab:mcanay_results" data-reference-type="ref" data-reference="tab:mcanay_results">3</a> display the results of Canay and Modified Canay estimations using the <span class="citation" data-cites="persson2007">[@persson2007]</span> dataset of government expenditures. Once again, the median coefficients are close to the mean coefficient from the original paper, with the Canay estimator delivering the closest coefficient to 2.36. Even further, statistical significance is achieved for the median coefficient in table <a href="#tab:canay_results" data-reference-type="ref" data-reference="tab:canay_results">2</a>, strengthening our reasoning on degrees of freedom above. Otherwise, we still obtain positive coefficients of the coalition variable at the 25th and 75th percentile of government spending.</p>
+<p>It is also worth stating the increasing monotonic pattern of quantile coefficients of coalition in table <a href="#tab:mcanay_results" data-reference-type="ref" data-reference="tab:mcanay_results">3</a>, conveying us that the effect of a permanent switch from single-party to coalition governments increases as we move toward greater government spending. Finally, note that even after explicitly accounting for country and period of legislature fixed effects in the Modified Canay estimator, the median coefficient remains stable, although it is no longer significant.</p>
+<div id="tab:mcanay_results">
+<table class="table">
+<caption>Government spending and coalition government - Modified Canay Estimator</caption>
+<colgroup>
+<col style="width: 65%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>VARIABLES</td>
+<td style="text-align: center;">(1) 25th quantile</td>
+<td style="text-align: center;">(2) 50th quantile</td>
+<td style="text-align: center;">(3) 75th quantile</td>
+</tr>
+<tr class="even">
+<td>coalition</td>
+<td style="text-align: center;">1.806 (1.422) 0.294* (0.170) -9.272 (12.01) 0.801 (0.553) -0.446 (0.292) -0.218 (0.412) 0.855*** (0.0956) 1.014*** (0.258) 161.0 (196.8)</td>
+<td style="text-align: center;">2.180 (1.367) 0.255 (0.190) -10.95 (13.39) 0.912 (0.618) -0.468 (0.299) -0.0964 (0.417) 1.020*** (0.0794) 1.319*** (0.238) 188.9 (219.4)</td>
+<td style="text-align: center;">2.281 (1.460) 0.251 (0.211) -11.36 (14.51) 0.887 (0.655) -0.741** (0.350) 0.194 (0.441) 1.055*** (0.103) 1.313*** (0.256) 196.4 (237.8)</td>
+</tr>
+<tr class="odd">
+<td>Observations Bootstrapped Standard errors in parentheses *** p<span class="math inline">\(&lt;\)</span><!-- -->0.01, ** p<span class="math inline">\(&lt;\)</span><!-- -->0.05, * p<span class="math inline">\(&lt;\)</span><!-- -->0.1</td>
+<td style="text-align: center;">133</td>
+<td style="text-align: center;">133</td>
+<td style="text-align: center;">133</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span id="tab:mcanay_results" label="tab:mcanay_results"></span></p>
+</section>
+<section id="sec:mmqreg" class="level1">
+<h1>Method of Moments Quantile Regression</h1>
+<p>This approach of estimating regression quantiles with multiple fixed effects distinguishes itself from the other estimators reviewed above in the sense that <span class="citation" data-cites="mss2019">[@mss2019]</span> introduce location-scale effects of fixed effects upon the distribution of interest. Compared to Canay’s estimator, the Method of Moments Quantile Regression (MMQREG) not only allows the <span class="math inline">\(\alpha_i\)</span>’s to affect <span class="math inline">\(Y_{it}\)</span> through location shifts, but rather MMQREG is able to identify the scale shifts that alter different points of the distribution belonging to <span class="math inline">\(Y\)</span>.</p>
+<p>We begin by defining the DGP of the location scale model:</p>
+<p><span class="math display">\[\label{eq:dgp_mmqreg}
+    Y_{it} = \alpha_i + X_{it}' \beta + (\delta_i + X_{it}' \gamma) u_{it}\]</span></p>
+<p>Where parameters <span class="math inline">\(\alpha_i\)</span> and <span class="math inline">\(\delta_i\)</span> capture the individual fixed effects. Note that, compared to equation <a href="#eq:dgp_canay" data-reference-type="ref" data-reference="eq:dgp_canay">[eq:dgp_canay]</a>, the fixed effects not only enter the model in an additive fashion, instead they also have a multiplicative effect upon the error term. In addition, the <span class="math inline">\(U_{it}\)</span> are i.i.d. across <span class="math inline">\(i\)</span> and <span class="math inline">\(t\)</span>, statistically independent of <span class="math inline">\(X_{it}\)</span> and satisfy <span class="math inline">\(E(U) = 0\)</span> and <span class="math inline">\(E(|U|) = 1\)</span> both of which normalize the random variable.</p>
+<p>Our location scale model in equation <a href="#eq:dgp_mmqreg" data-reference-type="ref" data-reference="eq:dgp_mmqreg">[eq:dgp_mmqreg]</a> implies that:</p>
+<p><span class="math display">\[\label{eq:mmqreg_quantile}
+    Q_{\tau}(Y_{it}|X_i) = [\alpha_i + \delta_i q(\tau)] + X_{it}' \beta + X_{it}' \gamma q(\tau)\]</span></p>
+<p>Where the scalar coefficient <span class="math inline">\(\alpha_i(\tau) \equiv \alpha_i + \delta_i q(\tau)\)</span> is the quantile-<span class="math inline">\(\tau\)</span> fixed effect for individual <span class="math inline">\(i\)</span>, which represent how time-invariant variables have <em>different impacts on different regions</em> of the conditional distribution of <span class="math inline">\(Y_{it}\)</span>. However, our real interest is in the regression quantile coefficients:</p>
+<p><span class="math display">\[\label{eq:rqcoefficients_mmqreg}
+    \beta_{\tau} = \beta + q(\tau) \gamma\]</span></p>
+<p>Which are simply a linear combination of the location coefficients (<span class="math inline">\(\beta\)</span>) and the scale coefficients (<span class="math inline">\(\gamma\)</span>), where the second vector of coefficients is weighted by the value of the <span class="math inline">\(\tau\)</span>-th quantile of the variable of interest <span class="math inline">\(Y_{it}\)</span>. <span class="citation" data-cites="mss2019">[@mss2019]</span> develop the following algorithm for implementing the MMQREG estimator:</p>
+<ol type="1">
+<li><p>Obtain <span class="math inline">\(\hat{\beta}_k\)</span> by regressing time-demeaned <span class="math inline">\(Y_{it}\)</span> on time-demeaned controls <span class="math inline">\(X_{it}\)</span>, i.e.&nbsp;obtain <span class="math inline">\(\hat{\beta}\)</span> by the within estimator.</p></li>
+<li><p>Estimate the <span class="math inline">\(\hat{\alpha}_i\)</span>’s and calculate the residuals <span class="math inline">\(\hat{R}_{it} = Y_{it} - \hat{\alpha}_i - X_{it}' \hat{beta}\)</span>.</p></li>
+<li><p>Obtain <span class="math inline">\(\hat{\gamma}_k\)</span> by the within estimator using <span class="math inline">\(|\hat{R}_{it}|\)</span> as the dependent variable.</p></li>
+<li><p>Estimate <span class="math inline">\(\hat{\delta}_i\)</span> by taking the time average of <span class="math inline">\(|\hat{R}_{it}| - X_{it}' \hat{\gamma}\)</span>.</p></li>
+<li><p>Estimate <span class="math inline">\(q(\tau)\)</span> by <span class="math inline">\(\hat{q}\)</span>, which corresponds to the regression quantile of standardized residuals [<span class="math inline">\(\hat{R}_{it}/(\hat{\gamma}_{i} + X_{it}' \hat{\gamma})]\)</span> upon an intercept term.</p></li>
+</ol>
+<p>Note that Steps 1 and 2 from the MMQREG algorithm are the same as those performed in Canay’s estimator. However, the location-scale model used in <span class="citation" data-cites="mss2019">[@mss2019]</span> adds three additional steps that are required to estimate <span class="math inline">\(\hat{\gamma}\)</span> and <span class="math inline">\(\hat{q}\)</span>, so that regression quantile coefficients <span class="math inline">\(\beta_{\tau}\)</span> are allowed to affect not only the location of the distribution, but also its shape.</p>
+<p>Add notes on the assumptions of MMQREG here <em>if</em> necessary.</p>
+<p>Statistical inference can be performed using the asymptotic distribution of the estimator derived in <span class="citation" data-cites="mss2019">[@mss2019]</span>. Expanding on this literature, <span class="citation" data-cites="riosavila2024">[@riosavila2024]</span> propose methods for computing alternative standard errors using the empirical influence functions of the estimators. Robust and clustered standard errors can be estimated following this approach, and are readily available as options in the <code>mmqreg</code> command in Stata. Another extension of the MMQREG estimator due to <span class="citation" data-cites="riosavila2024">[@riosavila2024]</span> is to allow for the inclusion of multiple fixed effects using an application of the Frisch-Waugh-Lovell (FWL) theorem to partial out the effect of variables capturing unobserved heterogeneity from both dependent and explanatory variables. Likewise, the command <code>mmqreg</code> allows for multiple fixed effects, as will be shown next.</p>
+<div id="tab:mmqreg_results">
+<table class="table">
+<caption>Government spending and coalition government - MMQREG Estimator</caption>
+<colgroup>
+<col style="width: 67%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>VARIABLES</td>
+<td style="text-align: center;">(1) q25</td>
+<td style="text-align: center;">(2) q50</td>
+<td style="text-align: center;">(3) q75</td>
+</tr>
+<tr class="even">
+<td>mcoalition</td>
+<td style="text-align: center;">2.690*** (1.043) 0.259*** (0.0975) -9.875 (6.454) 0.934** (0.372) -0.299** (0.131) 0.0615 (0.239) 168.8 (106.6)</td>
+<td style="text-align: center;">2.313** (0.950) 0.258** (0.114) -10.58 (8.887) 0.896** (0.386) -0.518*** (0.175) 0.139 (0.243) 181.9 (145.9)</td>
+<td style="text-align: center;">1.703 (1.207) 0.255 (0.173) -11.73 (14.78) 0.835 (0.539) -0.875*** (0.285) 0.266 (0.338) 203.3 (241.8)</td>
+</tr>
+<tr class="odd">
+<td>Observations Country FE Period FE Robust Standard errors in parentheses *** p<span class="math inline">\(&lt;\)</span><!-- -->0.01, ** p<span class="math inline">\(&lt;\)</span><!-- -->0.05, * p<span class="math inline">\(&lt;\)</span><!-- -->0.1</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+<td style="text-align: center;">133 Yes Yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><span id="tab:mmqreg_results" label="tab:mmqreg_results"></span></p>
+<p>As we allow for both location and scale shifts in our estimation method, the monotonic pattern observed in the first row of table <a href="#tab:mcanay_results" data-reference-type="ref" data-reference="tab:mcanay_results">3</a> is reversed. Now, the farther we move from the median of the distribution in the direction of greater government spending, the lower is the effect of a permanent change from single-party to coalition upon spending. The median coefficient, once again, remains close to the mean coefficient (2.36) under MMQREG estimation. Results from table <a href="#tab:mmqreg_results" data-reference-type="ref" data-reference="tab:mmqreg_results">4</a> support the conclusions from <span class="citation" data-cites="persson2007">[@persson2007]</span> regarding types of government and its spending during the last year of legislature, expanding the results to the response of the distribution of spending upon changes in explanatory variables.</p>
+<p>We must also note that statistical inference —with robust standard errors displayed in table <a href="#tab:mmqreg_results" data-reference-type="ref" data-reference="tab:mmqreg_results">4</a>— for the <span class="citation" data-cites="persson2007">[@persson2007]</span> dataset show that many coefficients that with the previous estimators were not statistically different from zero, are now significant even at the 99% confidence level. This is due to the ability to compute robust standard errors for the MMQREG estimator, contrasting with the CRE and Canay estimators, for which we estimated the covariance matrix using the bootstrap. Although not displayed here, our findings are robust to clustering standard errors for country so that the coefficients of 25th and 50th quantiles corresponding to the indicator variable for coalition government remain statistically significant.</p>
+</section>
+<section id="sec:conclusions" class="level1">
+<h1>Conclusions</h1>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

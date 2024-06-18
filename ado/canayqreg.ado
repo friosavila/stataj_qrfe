@@ -1,5 +1,5 @@
 *! v0.1 Very Basic!
-capture program drop canayqreg
+*capture program drop canayqreg
 program define canayqreg, eclass
 syntax varlist(fv ts) [if] [in] [iw], ABSorb(varlist)    /// variables to absorb
 		[Quantile(numlist >0 <100) /// quantile to estimate <- Lets use numbers between 0-100
