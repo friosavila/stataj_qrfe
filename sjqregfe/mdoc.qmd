@@ -4,14 +4,14 @@ format:
     stjquarto-pdf: default
 ---
 
-# Introduction {#sec:intro}
+# Introduction {#sec-intro}
 
-# The Basics {#sec:basics}
+# The Basics {#sec-basics}
 
-While standard regression techniques allow the researcher to determine
+Standard regression techniques allow the researcher to determine
 the effect of covariates $X$ on the expected value of a response
-variable $Y$, regression quantiles are capable of characterizing how
-changes in $X$ affect the entire distribution of $Y$. In applied
+variable $Y$. In contrast, quantile regressions are capable of characterizing how
+changes in $X$ affect the entire conditional distribution of $Y$. In applied
 research, this may be useful when one seeks to determine how does a
 given percentile of the distribution of interest respond to changing
 values of explanatory variables. For example, consider the effects of
