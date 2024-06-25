@@ -1,36 +1,88 @@
 ---
-title: "Untitled"
+title: "Estimation of Quantile Regressions with Multiple Fixed Effects"
+shorttitle: "Short toc Here"
+author: 
+
+    - name: Fernando Rios-Avila
+      email: friosavi@levy.org
+      affiliations:
+        - name: Levy Economics Institute
+          city: Annandale-on-Hudson, NY 
+    - name: Leonardo Siles
+      email: lsiles@fen.uchile.cl
+      affiliations:
+      - name: Universidad de Chile
+        city: Santiago, Chile
+    - name: Gustavo Canavire-Bacarreza
+      email: gcanavire@worldbank.org
+      affiliations:
+      - name: "The World Bank"
+        city: Washington, DC
+
+shortauthor: "Rios-Avila, Siles, Canavire-Bacarreza"
+
+aboutauthors: |
+    Fernando Rios-Avila is a Research Scholar at the Levy Economics Institute of Bard College. 
+    
+    Gustavo Canavire-Bacarreza is a Senior Economist at the World Bank.
+
+abstract: |
+    This is an example of StataJ article made by me
+
+keywords: Stata, LaTeX, Quarto, StataJ
 format: 
     stjquarto-pdf: default
+keep-tex: true        
+stata:    
+    vv: "vv"
+    ii: "ii"
+    yyyy: "yyyy"
+    mm: "mm"
+bibliography: "bibliography.bib"
+cite-method: natbib
+
 ---
 
 # Introduction {#sec-intro}
 
+Quantile regression, introduced by @koenker1978, has become an important tool in economic analysis, allowing to examine how the relationship between the dependent and independent variables varies across different points of the conditional distribution of the outcome. While ordinary least squares  focuses on analyzing the conditional mean, quantile regression provides a more comprehensive view of how covariates impact the entire conditional distribution of the dependent variable. This can reveal heterogeneous effects that may be otherwise overlooked when analyzing the conditional mean.
+
+A relatively recent development in the literature has focused on extending quantile regression analysis in a panel data setting to account for unobserved, but time fixed heterogeneity. This is particularly important in empirical research, where unobserved heterogeneity can bias estimates of the effects of interest. However, as it is common in the estimation of non-linear models with fixed effects, introducing fixed effects in quantile regression models poses several challenges. On the one hand, the simple inclusion of fixed effects can lead to an incidental parameter problem, which can bias estimates of the quantile coefficients [@neymanscott1948; @lancaster2000]. On the other hand, the computational complexity of estimating quantile regression models with fixed effects can be prohibitive, particularly for large datasets with multiple high-dimensional fixed effects. While many strategies have been proposed for estimating this type of model (see @galvao2017quantile for a review), none has become standard due to restrictive assumptions regarding the inclusion of fixed effects and the computational complexity.
+
+In spite of the growing interest in estimating quantile regression models with fixed effects in applied research, particularly in the fields of labor economics, health economics, and public policy, among others, there are few commands that allow the estimation of such models. In Stata, there are three main built-in commands available for estimating quantile regression `qreg`, `ivqregress`, and `bayes: qreg`, and none of them allow for the inclusion of fixed effects, other than using the dummy variable approach. From the community-contributed commands, there is `xtqreg`, which implements a quantile regression model with fixed effects based on the method of moments proposed by @mss2019, and more recently `xtmdqr` which implements a minimum distance estimation of quantile regression models with fixed effects described in @melly2023. In both cases, these command are constrained to a single set of fixed effects.[^1]
+
+[^1]: There are other community-contributed commands like `xtrifreg`, `rifhdfe`, `qregpd`, `rqr` among others that allow for the estimation of quantile regression models, but do not estimate conditional quantile regressions, but instead focus on unconditional quantile regressions, or quantile treatment effects.
+
+To address this, in this paper we introduce two Stata commands for estimating quantile regressions with multiple fixed effects: `mmqreg` and `qregfe`. The first command `mmqreg` is an extension of the method of moments quantile regression estimator proposed by @mss2019. The second `qregfe`, implements three other approaches: an implementation of a correlated random effects estimator based on @abrevaya2008, @wooldridge2019 and @wooldridge2010[Ch12.10.3]; the estimator proposed by @canay2011, and a proposed modification of this approach. In addition, we also present an auxiliary command `qregplot` for the visualization of the quantile regression models.
+
+Both commands offer the advantage of allowing for the estimation of conditional quantile regressions while controlling for multiple fixed effects. First, they leverage over existing Stata commands, as well as other community-contributed commands, to allow users to estimate quantile regression models and their standard errors under different assumptions. Second, they reduce the impact of the incidental parameters problem under different assumptions regarding the data generating process. In terms of standard errors, `mmqreg` allows for the estimation of analytical standard errors (see @mss2019 and @riosavila2024), whereas `qregfe` emphasizes the use of bootstrap standard errors. Finally, both commands are designed to be user-friendly, allowing for the estimation of quantile regression models with fixed effects in a single line of code. 
+
+The remainder of the paper is organized as follows. Section 2 reviews the methodological framework for quantile regression. Section 3 describes the methods and formulas used by `mmqreg` and `qregfe` commands. Section 4 introduces the commands, along with a brief description of their syntax and options. Section 5 introduces an auxiliary command for the visualization of quantile regression models. Section 6 provides an empirical applications demonstrating their use. Section 7 concludes.
+
+
 # The Basics {#sec-basics}
 
-Standard regression techniques allow the researcher to determine
-the effect of covariates $X$ on the expected value of a response
-variable $Y$. In contrast, quantile regressions are capable of characterizing how
-changes in $X$ affect the entire conditional distribution of $Y$. In applied
-research, this may be useful when one seeks to determine how does a
-given percentile of the distribution of interest respond to changing
-values of explanatory variables. For example, consider the effects of
-smoking on birth weight, as [@abrevaya2008] studied in the context of
-quantile regression. Instead of fixing an *unconditional threshold* so
-as to divide the sample in low birth weights and non-low birth weights,
-the authors followed a *conditional quantile* approach that enabled them
-to study the effects of birth inputs (e.g. smoking) in different parts
-of the birth weight distribution ([@abrevaya2008]).
+Quantile regressions allow researchers to identify the heterogenous effect covariates could have over the entire conditional distribution of the dependent variable. Let $y_i$ be the dependent variable, $x_i$ the vector of covariates, and $0<\tau<1$ is a parameter such that $q_\tau(y_i|X)$ identifies the $\tau th$ quantile of the conditional distribution of $y_i|X$. Under the assumption that conditional quantiles are linear functions of the parameters, the quantile regression model can be written as:
 
-In its more common setting, quantile regressions are assumed to follow a
-linear form:
+$$q_\tau(y_i|X)=x_i\beta(\tau)
+$${#eq-qr}
 
-$$\label{basic_qtile}
-    Q_{\tau}(Y | X) =  X \beta(\tau)$$
+Where $\beta(\tau)$ is the vector of coefficients that may vary across $\tau$ and needs to be estimated, nd $x_i$ is a vector of exogenous covariates that may include nonlinear functions of underlying variables. This expression indicates that, conditional on $X$, the $\tau$-th quantile of $Y$ can be approximated by a linear function of $X$.
 
-Such that, while the parameters of interest change across quantiles, the
-effects of covariates $X$ on the $\tau$-th quantile of $Y$ are assumed
-to be linear.
+As explained in @wooldridge2010, the coefficient of quantile regression models can be identified by minimizing the following loss function, with respect to $\beta(\tau)$:
+
+$$
+\hat\beta(\tau) = \min_{\beta(\tau)} \sum_{i=1}^{n} \rho_\tau \big(y_i-x_i\beta(\tau)\big)
+$${#eq-qloss}
+
+Where $\rho_\tau(u)=u(\tau-I(u<0))$ is the check function, and $I(\cdot)$ is the indicator function.
+
+Most commands for estimating quantile regression models focus on estimating the above loss function, using linear programming techniques, while others like @kaplan2017 (`sivqr`) and @chernozhukov2022 (`qrprocess`) use other optimization techniques. 
+
+As mentioned in @wooldridge2010, if no unobserved heterogeneity is present, the quantile regression model can be easily implemented in a panel setting, using a pooled version of the model. However, when unobserved heterogeneity is present explicitly, the estimation of quantile regressions is more challenging. Consider the case of panel data such that the conditional quantile regression model is given by:
+
+$$q_\tau(y_{it}|X_{it},\alpha_i)=x_{it}\beta(\tau)+\alpha_i
+$${#eq-feqr}
 
 In addition to heterogeneous effects of explanatory variables on the
 outcome of interest, the researcher might be interested as well in
@@ -173,33 +225,10 @@ country and period fixed effects are included in our estimations, in the
 same fashion as [@persson2007].
 
 ::: {#tab:cre_results}
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-                                                                                                       \(1\)           \(2\)           \(3\)
-  VARIABLES                                                                                        25th quantile   50th quantile   75th quantile
-                                                                                                                                  
-  coalition                                                                                            1.629           2.182           1.423
-                                                                                                      (1.370)         (1.567)         (1.662)
-  lag_last_exp                                                                                         0.227           0.110           0.167
-                                                                                                      (0.150)         (0.177)         (0.261)
-  lpop                                                                                                -14.01          -13.90          -18.10
-                                                                                                      (9.392)         (11.52)         (20.32)
-  prop65                                                                                               0.239           1.008           0.709
-                                                                                                      (0.603)         (0.773)         (0.912)
-  ygap                                                                                               -0.380\*        -0.538\*         -0.574
-                                                                                                      (0.211)         (0.300)         (0.407)
-  length                                                                                              -0.242           0.373          0.00656
-                                                                                                      (0.533)         (0.423)         (0.481)
-  Constant                                                                                             245.0           238.1           309.8
-                                                                                                      (152.7)         (189.4)         (331.5)
-                                                                                                                                  
-  Observations                                                                                          133             133             133
-  Country FE                                                                                            Yes             Yes             Yes
-  Period FE                                                                                             Yes             Yes             Yes
-  Bootstrapped Standard errors in parentheses                                                                                     
-  \*\*\* p$<$`<!-- -->`{=html}0.01, \*\* p$<$`<!-- -->`{=html}0.05, \* p$<$`<!-- -->`{=html}0.1                                   
-  Mean (across FE) coefficients of independent variables are omitted.                                                             
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-
+| Column 1 | Column 2 | Column 3 |
+| -------- | -------- | -------- |
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
   : Government spending and coalition government - CRE Estimator
 :::
 
@@ -319,37 +348,11 @@ not be met, especially for short panels.
 
 Describe the implementation in Stata here.
 
-::: {#tab:canay_results}
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-                                                                                                       \(1\)           \(2\)           \(3\)
-  VARIABLES                                                                                        25th quantile   50th quantile   75th quantile
-                                                                                                                                  
-  coalition                                                                                            2.142          2.319\*          1.779
-                                                                                                      (1.478)         (1.339)         (1.391)
-  lag_last_exp                                                                                         0.235           0.258          0.294\*
-                                                                                                      (0.174)         (0.176)         (0.178)
-  lpop                                                                                                -10.75          -10.75          -10.76
-                                                                                                      (12.95)         (12.96)         (12.97)
-  prop65                                                                                               0.902           0.910           0.797
-                                                                                                      (0.599)         (0.602)         (0.588)
-  ygap                                                                                               -0.494\*         -0.430        -0.664\*\*
-                                                                                                      (0.290)         (0.290)         (0.333)
-  length                                                                                              -0.0973          0.103           0.169
-                                                                                                      (0.414)         (0.406)         (0.418)
-  Constant                                                                                             184.9           184.8           186.8
-                                                                                                      (212.3)         (212.3)         (212.6)
-                                                                                                                                  
-  Observations                                                                                          133             133             133
-  Country FE                                                                                            Yes             Yes             Yes
-  Period FE                                                                                             Yes             Yes             Yes
-  Bootstrapped Standard errors in parentheses                                                                                     
-  \*\*\* p$<$`<!-- -->`{=html}0.01, \*\* p$<$`<!-- -->`{=html}0.05, \* p$<$`<!-- -->`{=html}0.1                                   
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-
-  : Government spending and coalition government - Canay Estimator
-:::
-
-[]{#tab:canay_results label="tab:canay_results"}
+| Column 1 | Column 2 | Column 3 |
+| -------- | -------- | -------- |
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+: as
 
 Tables [2](#tab:canay_results){reference-type="ref"
 reference="tab:canay_results"} and
@@ -376,39 +379,11 @@ after explicitly accounting for country and period of legislature fixed
 effects in the Modified Canay estimator, the median coefficient remains
 stable, although it is no longer significant.
 
-::: {#tab:mcanay_results}
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-                                                                                                       \(1\)           \(2\)           \(3\)
-  VARIABLES                                                                                        25th quantile   50th quantile   75th quantile
-                                                                                                                                  
-  coalition                                                                                            1.806           2.180           2.281
-                                                                                                      (1.422)         (1.367)         (1.460)
-  lag_last_exp                                                                                        0.294\*          0.255           0.251
-                                                                                                      (0.170)         (0.190)         (0.211)
-  lpop                                                                                                -9.272          -10.95          -11.36
-                                                                                                      (12.01)         (13.39)         (14.51)
-  prop65                                                                                               0.801           0.912           0.887
-                                                                                                      (0.553)         (0.618)         (0.655)
-  ygap                                                                                                -0.446          -0.468        -0.741\*\*
-                                                                                                      (0.292)         (0.299)         (0.350)
-  length                                                                                              -0.218          -0.0964          0.194
-                                                                                                      (0.412)         (0.417)         (0.441)
-  Country FE                                                                                        0.855\*\*\*     1.020\*\*\*     1.055\*\*\*
-                                                                                                     (0.0956)        (0.0794)         (0.103)
-  Period FE                                                                                         1.014\*\*\*     1.319\*\*\*     1.313\*\*\*
-                                                                                                      (0.258)         (0.238)         (0.256)
-  Constant                                                                                             161.0           188.9           196.4
-                                                                                                      (196.8)         (219.4)         (237.8)
-                                                                                                                                  
-  Observations                                                                                          133             133             133
-  Bootstrapped Standard errors in parentheses                                                                                     
-  \*\*\* p$<$`<!-- -->`{=html}0.01, \*\* p$<$`<!-- -->`{=html}0.05, \* p$<$`<!-- -->`{=html}0.1                                   
-  ----------------------------------------------------------------------------------------------- --------------- --------------- ---------------
-
-  : Government spending and coalition government - Modified Canay
-  Estimator
-:::
-
+| Column 1 | Column 2 | Column 3 |
+| -------- | -------- | -------- |
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+ 
 []{#tab:mcanay_results label="tab:mcanay_results"}
 
 # Method of Moments Quantile Regression {#sec:mmqreg}
@@ -424,8 +399,8 @@ points of the distribution belonging to $Y$.
 
 We begin by defining the DGP of the location scale model:
 
-$$\label{eq:dgp_mmqreg}
-    Y_{it} = \alpha_i + X_{it}' \beta + (\delta_i + X_{it}' \gamma) u_{it}$$
+$$Y_{it} = \alpha_i + X_{it}' \beta + (\delta_i + X_{it}' \gamma) u_{it}
+$${#eq-dgp_mmqreg}
 
 Where parameters $\alpha_i$ and $\delta_i$ capture the individual fixed
 effects. Note that, compared to equation
@@ -498,37 +473,13 @@ of the Frisch-Waugh-Lovell (FWL) theorem to partial out the effect of
 variables capturing unobserved heterogeneity from both dependent and
 explanatory variables. Likewise, the command `mmqreg` allows for
 multiple fixed effects, as will be shown next.
-
-::: {#tab:mmqreg_results}
-  ----------------------------------------------------------------------------------------------- ------------- -------------- --------------
-                                                                                                      \(1\)         \(2\)          \(3\)
-  VARIABLES                                                                                            q25           q50            q75
-                                                                                                                               
-  mcoalition                                                                                       2.690\*\*\*    2.313\*\*        1.703
-                                                                                                     (1.043)       (0.950)        (1.207)
-  llast                                                                                            0.259\*\*\*    0.258\*\*        0.255
-                                                                                                    (0.0975)       (0.114)        (0.173)
-  mlpop                                                                                              -9.875         -10.58         -11.73
-                                                                                                     (6.454)       (8.887)        (14.78)
-  mprop65                                                                                           0.934\*\*     0.896\*\*        0.835
-                                                                                                     (0.372)       (0.386)        (0.539)
-  mygap                                                                                            -0.299\*\*    -0.518\*\*\*   -0.875\*\*\*
-                                                                                                     (0.131)       (0.175)        (0.285)
-  leg_length_cgexp                                                                                   0.0615         0.139          0.266
-                                                                                                     (0.239)       (0.243)        (0.338)
-  Constant                                                                                            168.8         181.9          203.3
-                                                                                                     (106.6)       (145.9)        (241.8)
-                                                                                                                               
-  Observations                                                                                         133           133            133
-  Country FE                                                                                           Yes           Yes            Yes
-  Period FE                                                                                            Yes           Yes            Yes
-  Robust Standard errors in parentheses                                                                                        
-  \*\*\* p$<$`<!-- -->`{=html}0.01, \*\* p$<$`<!-- -->`{=html}0.05, \* p$<$`<!-- -->`{=html}0.1                                
-  ----------------------------------------------------------------------------------------------- ------------- -------------- --------------
-
-  : Government spending and coalition government - MMQREG Estimator
-:::
-
+ 
+| Column 1 | Column 2 | Column 3 |
+| -------- | -------- | -------- |
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+: Government spending and coalition government - MMQREG Estimator
+ 
 []{#tab:mmqreg_results label="tab:mmqreg_results"}
 
 As we allow for both location and scale shifts in our estimation method,
@@ -560,3 +511,6 @@ and 50th quantiles corresponding to the indicator variable for coalition
 government remain statistically significant.
 
 # Conclusions {#sec:conclusions}
+
+
+ 
