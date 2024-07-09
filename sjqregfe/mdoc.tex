@@ -218,11 +218,11 @@ effects. First, they leverage over existing Stata commands, as well as
 other community-contributed commands, to allow users to estimate
 quantile regression models and their standard errors under different
 assumptions. Second, they reduce the impact of the incidental parameters
-problem under different assumptions regarding the data generating
-process. In terms of standard errors, \texttt{mmqreg} allows for the
-estimation of analytical standard errors (see \citet{mss2019} and
-\citet{riosavila2024}), whereas \texttt{qregfe} emphasizes the use of
-bootstrap standard errors. Finally, both commands are designed to be
+problem depending on the assumptions of the underlying the data
+generating process. In terms of standard errors, \texttt{mmqreg} allows
+for the estimation of analytical standard errors (see \citet{mss2019}
+and \citet{riosavila2024}), whereas \texttt{qregfe} emphasizes the use
+of bootstrap standard errors. Finally, both commands are designed to be
 user-friendly, allowing for the estimation of quantile regression models
 with fixed effects in a single line of code.
 
@@ -237,357 +237,313 @@ Section 7 concludes.
 
 \section{The Basics}\label{sec-basics}
 
-While standard regression techniques allow the researcher to determine
-the effect of covariates \(X\) on the expected value of a response
-variable \(Y\), regression quantiles are capable of characterizing how
-changes in \(X\) affect the entire distribution of \(Y\). In applied
-research, this may be useful when one seeks to determine how does a
-given percentile of the distribution of interest respond to changing
-values of explanatory variables. For example, consider the effects of
-smoking on birth weight, as \citep{abrevaya2008} studied in the context
-of quantile regression. Instead of fixing an \emph{unconditional
-threshold} so as to divide the sample in low birth weights and non-low
-birth weights, the authors followed a \emph{conditional quantile}
-approach that enabled them to study the effects of birth inputs
-(e.g.~smoking) in different parts of the birth weight distribution
-(\citep{abrevaya2008}).
+Quantile regressions allow researchers to identify the heterogenous
+effect covariates could have over the entire conditional distribution of
+the dependent variable. Let \(y_i\) be the dependent variable, \(x_i\)
+the vector of covariates, and \(0<\tau<1\) is a parameter such that
+\(q_\tau(y_i|X)\) identifies the \(\tau th\) quantile of the conditional
+distribution of \(y_i|X\). Under the assumption that conditional
+quantiles are linear functions of the parameters, the quantile
+regression model can be written as:
 
-In its more common setting, quantile regressions are assumed to follow a
-linear form:
-
-\begin{equation}\phantomsection\label{eq-qr}{
-Q_{\tau}(Y | X) =  X \beta(\tau)
+\begin{equation}\phantomsection\label{eq-qr}{q_\tau(y_i|X)=x_i\beta(\tau)
 }\end{equation}
 
-Where \(Q_{\tau}(Y | X)\) is the \(\tau\)-th quantile of \(Y\)
-conditional on
+Where \(\beta(\tau)\) is the vector of coefficients that may vary across
+\(\tau\) and needs to be estimated, and \(x_i\) is a vector of exogenous
+covariates that may include nonlinear functions of underlying variables.
+This expression indicates that, conditional on \(X\), the \(\tau\)-th
+quantile of \(Y\) can be approximated by a linear function of \(X\).
 
-Such that, while the parameters of interest change across quantiles, the
-effects of covariates \(X\) on the \(\tau\)-th quantile of \(Y\) are
-assumed to be linear.
+As explained in \citet{wooldridge2010}, the coefficient of quantile
+regression models can be identified by minimizing the following loss
+function, with respect to \(\beta(\tau)\):
 
-In addition to heterogeneous effects of explanatory variables on the
-outcome of interest, the researcher might be interested as well in
-properly addressing the problem of unobserved heterogeneity. Returning
-to the example of birth weights, it may be the case that unobservable
-characteristics of the mother are correlated with both the birth outcome
-and birth inputs, such as her smoking status during pregnancy or whether
-she attended prenatal care visits (\citep{abrevaya2008}). In this case,
-a panel data approach may be useful for obtaining causal estimates of
-the effects of explanatory variables on quantiles of \(Y\).
+\begin{equation}\phantomsection\label{eq-qloss}{
+\hat\beta(\tau) = \min_{\beta(\tau)} \sum_{i=1}^{n} \rho_\tau \big(y_i-x_i\beta(\tau)\big)
+}\end{equation}
 
-At the same time, panel data models with unobserved time-invariant
-effects depend upon demeaning techniques to eliminate such effects and
-yield consistent estimators of the parameters of interest. However,
-differentiating out individual effects is not a feasible approach within
-the context of regression quantiles, the reason being that quantiles are
-\emph{not} linear operators. Many authors, for example
-\citep{abrevaya2008}, \citep{canay2011} or \citep{mss2019} have stated
-that this key limitation has prevented further progress in the
-estimation of regression quantiles with fixed effects.
+Where \(\rho_\tau(u)=u\big(\tau-I(u<0)\big)\) is the check function, and
+\(I(\cdot)\) is the indicator function.
 
-In this paper, we review four estimators for regression quantiles in the
-presence of fixed effects. All of them are relatively simple to
-implement with our provided commands for Stata (see sections
-\hyperref[sec:cre]{3}, \hyperref[sec:canay]{4} and
-\hyperref[sec:mmqreg]{5} below). However, this easiness comes at the
-cost of making important assumptions regarding, among others, the data
-generating process (DGP) and the effect of unobserved heterogeneity
-\(\alpha_i\) on the distribution of \(Y\). The following sections
-describe each of the estimators, their key assumptions and provide
-examples for their implementation in Stata.
+Most commands for estimating quantile regression models focus on
+estimating the above loss function, using linear programming techniques,
+while others like \citet{kaplan2017} (\texttt{sivqr}) and
+\citet{chernozhukov2022} (\texttt{qrprocess}) use other optimization
+techniques.
 
-\section{Correlated Random Effects}\label{sec:cre}
+When no unobserved heterogeneity is present, quantile regression model
+can be easily implemented in a panel setting (see
+\citet{wooldridge2010}), using a pooled version of the model. However,
+when unobserved heterogeneity is present explicitly, the estimation of
+quantile regressions is more challenging. Consider the case of panel
+data such that the conditional quantile regression model is given by:
 
-This estimator, described by \citep{wooldridge2010}, rests upon the
-Mundlak repsesentation of a Correlated Random Effects (CRE) model for
-the estimation of regression quantiles with panel data. The underlying
-DGP for the outcome of interest \(Y_{it}\) is:
+\begin{equation}\phantomsection\label{eq-feqr}{q_\tau(y_{it}|X_{it},1_i)=x_{it}\beta(\tau)+\alpha_i(\tau) 
+}\end{equation}
 
-\[\label{eq:dgp_cre}
-    Y_{it} = X_{it}' \beta + \alpha_i + u_{it}\]
+This specification is explicitly considering that the unobserve effect
+is identified for each \(i_{th}\) observation, and that this effect
+varies across quantiles (\(\alpha_i(\tau)\)). A common approach, yet
+incorrect due to the incidental parameter problem, is to estimate this
+model by adding dummy variables for each individual in the quantile
+regression model (as in \citet{budig2001}), or by demeaning the
+explanatory variables (as in \citet{budig2010}). In fact, there is no
+transformation of the data that can eliminate the individual fixed
+effects, as it happens in standard linear regression models.
 
-where \(\alpha_i\) is the time-invariant individual effect and can be
-described in terms of \(X_i \equiv (X_{i1},...,X_{iT})\) as follows:
+In this framework, the problem of the incidental parameter problem
+occurs because the unobserved factors cannot be differenced out of. In
+other words, unless specific assumptions are made, the estimation
+requires the explicit estimation of the unobserved fixed effect.
+Unfortunately, because the number of available observations per
+individual fixed effect is limited, they cannot be estimated with
+precision. In turn, the cumulative errors in the estimation of the fixed
+effects will also affect the conditional distribution of the outcome,
+which quantile regressions leverage on, leading to inconsistent
+estimates of all parameters. \footnote{This is similar to the measuring
+  error problem of dependent variables in quantile regression models
+  discussed in \citet{hausman2021}.}
 
-\[\label{eq:mundlak_rep}
-    \alpha_i = \psi + \Bar{X_i}' \lambda + v_i\]
+In the next section, we present a few solutions and implementations for
+the estimation of quantile regression models with multiple fixed
+effects.
 
-where \(\Bar{X_i}\) denotes the time average of characteristics across
-individuals. Then, the conditional \(\tau\)-th quantile of \(Y_{it}\)
-is:
+\subsection{Correlated Random Effects: CRE}\label{sec-cre}
 
-\[\label{eq:qr_cre}
-    Q_{\tau}(Y_{it} | X_i) = \psi + X_{it}' \beta + \Bar{X_i}' \lambda + Q_{\tau}(a_{it} | X_i)\]
+The first approach we discuss is the use of Correlated Random Effects
+(CRE) models for the estimation of quantile regression models. The CRE
+model is an alternative methodology for the estimation of fixed effects
+models that was proposed by \citet{mundlak1978} and later generalized by
+\citet{chamberlain1982}. In contrast with standard fixed effects, the
+approach allows users to control for time fixed covariates in addition
+to time-varying covariates. And, in contrast with the random effects
+model, it does not make the assumption that the unobserved effect is
+uncorrelated with the observed covariates. Interestingly, in the context
+of linear models, the CRE model is equivalent to the fixed effects model
+\citep{wooldridge2010}.
 
-where \(a_{it} \equiv v_i + u_{it}\) is the composite error. The CRE
-estimator using the Mundlak representation imposes the following key
-assumption:
+Consider the following model:
 
-\[\begin{gathered}
-    \text{CRE1.\quad $a_{it}$ is independent of $X_i$.}\label{eq:cre1}
-    %\text{CRE1.}\quad v_i\; \text{is independent of}\; X_i \label{eq:cre1} \\
-    %\text{CRE2.}\quad Q_{\tau}(u_{it} | X_i, v_i) = Q_{\tau}(u_{it} | X_{it}) \label{eq:cre2}
-\end{gathered}\]
+\begin{equation}\phantomsection\label{eq-cre-1}{y_{it} = x_{it}\beta + z_{i}\gamma + \alpha_i + u_{it}
+}\end{equation}
 
-Stringent as may be, this assumption allows to consistently estimate
-\(\beta\) and \(\lambda\) from a pooled quantile regression of
-\(Y_{it}\) on \(X_{it}\) and \(\Bar{X_{i}}\). As \citep{wooldridge2010}
-remarks, CRE1 amounts to assuming that quantile functions are parallel
-or, in other words, that by imposing a relationship between \(X_{i}\)
-and \(\alpha_i\) of the form displayed in equation
-\hyperref[eq:mundlak_rep]{{[}eq:mundlak\_rep{]}} we can only estimate
-the location shifts of quantile regressions. As it will be shown below,
-this is a feature the CRE estimator shares with Canay's method (see
-section \hyperref[sec:canay]{4}) for estimating regression quantiles in
-a panel data context. Both estimators are constrained in the sense that
-only location effects on quantile functions are accounted for, whereas
-the MMQREG method (see section \hyperref[sec:mmqreg]{5}) has the ability
-to estimate quantile coefficients that take into account both location
-and scale effects.
+It is well known that if \(\alpha_i\) is correlated with \(x_{it}\), the
+Random Effects (RE) estimator will be inconsistent. This is similar to
+the ommited variable bias. The solution proposed by \citet{mundlak1978}
+and \citet{chamberlain1982} was to explicitly account for that
+correlation in the model, by assuming the unobserved effect \(\alpha_i\)
+is a linear projection of the observed time-varying variables.
+Specifically:
 
-\citep{abrevaya2008} develop an alternative CRE estimator for regression
-quantiles with panel data drawing on the model of
-\citep{chamberlain1982}. However, its implementation is severely
-restricted because Abrevaya and Dahl's estimator regresses \(Y_{it}\) on
-\(X_{it}\) and \(X_{i}\) for a given \(\tau\). Even if we have a
-balanced panel available for our application, we will have to deal with
-the large quantity of regressors included in the equation
-{[}\(K(1+T)\){]} and its corresponding loss of degrees of freedom for
-statistical inference.
+\begin{equation}\phantomsection\label{eq-cre-2}{\begin{aligned}
+Mundlack:  & & \alpha_i &= \gamma_0 + \bar x_{i}\gamma + v_i&  \\
+Chamberlain: & & \alpha_i &= \gamma_0 + x_{i1}\gamma_1 + x_{i2}\gamma_2 + \dots + x_{iT}\gamma_T + v_i 
+\end{aligned}
+}\end{equation}
 
-Introduction of multiple fixed effects in this setting is
-straightforward. First, modify equation
-\hyperref[eq:dgp_cre]{{[}eq:dgp\_cre{]}} so as to include two or more
-sets of fixed effects (\(\alpha^1, \alpha^2, ..., \alpha^k\)) and
-proceed by computing the averages of explanatory variables \(X\) with
-respect to the variable identifying the fixed effect. Finally, run a
-regression of \(Y\) on the set of original control variables and the
-averages just calculated. In terms of the quantile function, equation
-\hyperref[eq:qr_cre]{{[}eq:qr\_cre{]}} requires to be modified
-accordingly:
+The main difference between both approaches was that Chamberlain's is
+more flexible by allowing all realizations of the time-varying variables
+to explain the unobserved effect. In contrast, Mundlak's approach only
+considers the average of the time-varying variables, which is a more
+restrictive specification. Using either model specification, if we
+substitute Equation~\ref{eq-cre-2} into Equation~\ref{eq-cre-1}, the
+final model can be written as:
 
-\[\label{eq:qr_cre_twoway}
-    Q_{\tau}(Y_{it} | X_i) = \Psi + X_{it}' \beta + \Bar{X^1_i}' \lambda^1 + \Bar{X^2_i}' \lambda^2 + Q_{\tau}(a_{it} | X_i)\]
+\begin{equation}\phantomsection\label{eq-cre-final}{y_{it} = x_{it}\beta + z_{i}\gamma + \gamma_0 + f(x_{it})\Gamma + v_i + u_{it}
+}\end{equation}
 
-For the case of twoway fixed effects and where
-\(\Psi \equiv \psi^1 + \psi^2\).
+where \(f(x_{it})\) can be the full set of time-varying variables or
+just the average of them. Interestingly, either method provides the same
+results if the panel data is balanced, and all covariates are strictly
+exogenous. However, this identity breaks down in other cases (see
+\citet{abrevaya2013}).
 
-Implementation of the CRE estimator for quantile regression in Stata can
-be done with the command \texttt{cre}, which is actually a prefix for
-the estimation of CRE models. Option
-\texttt{{[}abs(}\emph{\texttt{varlist}}\texttt{){]}} is used to provide
-the command with variables identifying groups of observations that will
-be subsequently used to estimate the fixed effects. By default,
-singleton groups are dropped from the estimation. Now, we present an
-application of the CRE estimator for regression quantiles with multiple
-fixed effects using the aforementioned command. Note that the same
-dataset will be used for all estimation methods surveyed in this paper,
-so it will be worth to outline the main features of the data before
-proceeding to display, comment and compare the estimation results.
+The strategy proposed by \citet{abrevaya2008} was to extend the CRE
+model (\citet{chamberlain1982} style) for the estimation of quantile
+regression models. This, however, has some limitations. First, when the
+number of periods is large, the number of additional regressors grows
+quickly, which can lead to other problems during estimation. Second,
+while the application of \citet{chamberlain1982} projection approach for
+unbalance data is possible (see \citet{abrevaya2013}), it is not
+straightforward to implement in practice, specially for the framework of
+quantile regression. Instead, we follow \citet{wooldridge2010} and
+\citet{wooldridge2019}, and use the Mundlak representation of the CRE
+model for the estimation of quantile regression models.
+\citet{wooldridge2019} has shown that this can be easily applied for
+cases with unbalanced panels, and the estimation of non-linear models.
 
-We use the panel from \citep{persson2007} who study the effect of
-alternative types of government on its overall spending in the last year
-of the legislature. The authors consider both coalition and single-party
-as government types, leaving out from consideration minority
-governments. Here, we will only focus on the relationship a coalition
-government has with its overall spending and expand \citep{persson2007}
-results by estimating the .25, .5 and .75 quantiles of the government
-spending distribution.
+Specifically, \citet{wooldridge2010} suggests that we could estimate the
+quantile regression model using the Mundlak representation of the CRE
+model:
 
-Variables used for estimation include central government spending as
-percentage of GDP in the last year of legislature (\emph{last\_exp}), an
-indicator variable for coalition governments (\emph{coalition}),
-population size in log scale (\emph{lpop}), the percentage of population
-over 65 years of age (\emph{prop65}), the log-deviation of output from
-the country trend (\emph{ygap}) and the length (in years) of the
-legislature (\emph{length}). Both country and period fixed effects are
-included in our estimations, in the same fashion as \citep{persson2007}.
+\[q_\tau(y_{it}|x_{it},\bar x_i)=x_{it}\beta(\tau)+\bar x_i\gamma(\tau) 
+\]
 
-\phantomsection\label{tab:cre_results}
-\begin{longtable}[]{@{}lll@{}}
-\caption{Government spending and coalition government - CRE
-Estimator}\tabularnewline
-\toprule\noalign{}
-Column 1 & Column 2 & Column 3 \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-Column 1 & Column 2 & Column 3 \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Data 1 & Data 2 & Data 3 \\
-Data 4 & Data 5 & Data 6 \\
-\end{longtable}
+One of the benefits from this approach is that it will not only allow to
+easily use unbalanced panels, but may also provide an approach to
+control for multiple fixed effects, as discussed in \citet{baltagi2023}.
+For example, for a case with two dimensions of fixed effects (say
+individual and time), we could model each time varying variable as
+follows:
 
-\phantomsection\label{tab:cre_results}{}
+\[x^k_{it}-E(x_{it}^k)=\lambda^{xk}_i + \lambda^{xk}_t + \varepsilon_{it}
+\]
 
-Estimation results from \citep{persson2007} dataset using the CRE
-estimator for quantile regression are displayed in table
-\hyperref[tab:cre_results]{1} and show heterogeneous effects of a
-permanent switch from a single-party to a coalition government on
-government spending. The largest effect is obtained at the median of the
-distribution, and the estimated coefficient is close to the one
-\citep{persson2007} computed using the within estimator (2.36). At the
-lower and upper quartile of the distribution we still find positive
-coefficients, which support the theoretical predictions of the model
-developed by the same authors. However, none of the coefficients for
-coalition across quantiles are statistically different from zero. In the
-context of CRE estimation, this fact may be partly due to the loss of
-degrees of freeedom implied by the addition of 12 extra regressors to
-the equation. In general, CRE will add \(W \times K\) explanatory
-variables, with \(W\) being the number of fixed effects we are
-accounting for.
+Here, we use the centered transformation of the explanatory variable,
+that is \(x^k_{it}-E(x_{it}^k)\), so that all \(\lambda's\) have an
+expected value of zero. Also, \(\lambda^{xk}_i\) and \(\lambda^{xk}_t\)
+are the equivalent to \(\bar x_i\) in the Mundlak one-way fixed effects
+model, and they can be obtained using an iterative process similar to
+\citet{rios2015} or \citet{correia_feasible_nodate}.\footnote{Internally,
+  we use \citet{correia_feasible_nodate} \texttt{reghdfe} to obtain the
+  predicted fixed effects} The final model can be written as:
 
-\section{Canay (2011) Estimator}\label{sec:canay}
+\[q_\tau(y_{it}|x_{it},\lambda_i^x,\lambda_t^x)=x_{it}\beta(\tau)+\lambda^x_i\gamma_i(\tau)+\lambda^x_t\gamma_t(\tau)  
+\]
 
-Canay's estimator key assumption is that fixed effects are merely
-treated as location-shifters. That is, unobserved individual effects
-only change the distribution of the response variable in a parallel
-fashion. While this may be a rather strong assumption, it helps to
-consistently estimate the parameters of interest using a simple
-transformation of the data as detailed below \citep{canay2011}.
+Which could be extended to any number of fixed effects.
 
-The underlying DGP of \(Y_{it}\) is:
+\subsection{Canay (2011) Estimator}\label{sec-canay}
 
-\[\label{eq:dgp_canay}
-    Y_{it} = X_{it}' \beta(u_{it}) + \alpha_i\]
+The second approach under consideration is the estimator proposed by
+\citet{canay2011}. This paper argues that the estimator proposed by
+\citet{abrevaya2008}, and thus the implementation described above, may
+not provide consistent estimates of the quantile regression
+coefficients, as long as there is a disturbance \(\varepsilon_{it}\)
+left after modeling Equation~\ref{eq-cre-2}. However, under the
+assumption that the unobserved effect is a pure location shift, that is
+\(\alpha_i\) does not vary across quantiles, they propose that a
+two-step estimator can be used to consistently estimate the quantile
+regression coefficients. The first one eliminating the unobserved fixed
+effect, and the second one estimating the quantile coefficients.
 
-To consistently estimate the \(\beta_{\tau}\) from the data, the
-following assumptions are in place:
+To better understand how this estimator works, let us consider the
+following data generating process (DGP):
 
-\[\begin{gathered}
-    \text{CANAY1. Conditional on $X_{it} = x$ the random variables $X_{it}$ and $\alpha$ are independent.} \\
-    \text{CANAY2. $U_{it}$ is independent of $X_i$ and $\alpha_i$, with $U_{it} \sim U[0,1]$} \\
-    \text{CANAY3. $\beta_{\mu} \equiv E[\beta(U_{it})]$. That is, $\beta_{\mu}$ exists.}
-\end{gathered}\]
+\[y_{i} =\beta_0(\rho_{i}) +  \beta_1(\rho_{i}) x_{1i} + \beta_2(\rho_{i}) x_{2i} 
+\]
 
-Start defining the following equation, which is simply a restatement of
-equation \hyperref[eq:dgp_canay]{{[}eq:dgp\_canay{]}}, as follows:
+This represents the random coefficient approach to quantile regression
+models, where the coefficients of the model are allowed to vary as a
+function of a random variable \(\rho_{i}\), which follows a uniform
+distribution. \(\rho_i\) is unobserved, but it is assumed to be
+independent of the covariates. Given this DGP, the conditional quantile
+function can be written as:
 
-\[\label{eq:canay_2.3}
-Y_{it} = X_{it}' \beta(\tau) + \alpha_i + e_{it}(\tau)\]
+\[q_{\tau}(y_{i}|x_{1i},x_{2i}) = \beta_0(\tau) + \beta_1(\tau) x_{1i} + \beta_2(\tau) x_{2i}\]
 
-Where \(e_{it}(\tau) \equiv X_{it}'[\beta(U_{it} - \beta(\tau)]\). Then,
-due to assumption CANAY2, in the above equation only \(\beta(\tau)\) and
-\(e_{it}(\tau)\) depend on \(\tau\). Next, write a conditional mean
-equation for \(Y_{it}\) as the following:
+In this specification, the impact of \(x_{k}\) on \(y\) is allowed to
+vary across quantiles. However, we could also impose the assumption that
+some of the coefficients are constant across quantiles. For example, if
+\(\beta_2(\tau)=\beta_2\) for all \(\tau\), we would be assuming that
+\(x_2\) only has a location effect on \(y\). In fact, if all
+coefficients (but \(\beta_0\)) are constant across quantiles, the model
+could just as well be estimated using OLS. And under this scenario, it
+may be convenient to estimate the model imposing this restriction in the
+model. This is the main idea behind the Canay estimator.
 
-\[\label{eq:canay_meaneq}
-    Y_{it} = X_{it}' \beta_{\mu} + \alpha_i + u_{it}\]
+The estimator proposed by \citet{canay2011} imposes the assumption that
+the unobserved effect is a pure location shift. More explicit, assumes
+that the data generating process in a panel data setting, can be written
+as follows:
+\[y_{it} =\beta_0(\rho_{it}) +  \beta_1(\rho_{it}) x_{it} + \alpha_i
+\]
 
-Where \(u_{it} \equiv X_{it}' [\beta(U_{it}) - \beta_{\mu}]\).
-Assumption CANAY3 allows us to write this kind of mean equation. Then,
-the two-step estimator due to \citep{canay2011} is defined next:
+According to \citet{canay2011}, under the assumption that \(\alpha_i\)
+is constant across quantiles, we could consistently estimate the
+quantile regression coefficients \(\beta{\tau}\), by simply transforming
+the dependent variable as follows:
 
-\emph{Step 1.} Let \(\hat{\beta}_\mu\) be a \(\sqrt{nT}\)-consistent
-estimator of \(\beta_{\mu}\). Define
-\(\hat{\alpha}_i \equiv \mathbb{E}_T[Y_{it} - X'_{it}\hat{\beta}_{\mu}]\).
+\[y_{it}-\alpha_i =\tilde y_{it}=\beta_0(\rho_{it}) +  \beta_1(\rho_{it}) x_{it} 
+\]
 
-\emph{Step 2.} Let \(\hat{Y}_{it} = Y_{it} - \hat{\alpha}_i\) and define
-the two-step estimator as:
+And then use standard quantile methods on \(\tilde{y}_{it}\). More
+formally, he suggests the following two-step estimator:
 
-\[\label{eq:qreg_canay}
-    \hat{\beta}(\tau) \equiv \min_{\beta \in \beta} \mathbb{E}_{nT} [\rho(\hat{Y}_{it} - X_{it}' \beta)]\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Using an OLS regression, run the following model:
+  \[y_{it} = x_{it}\beta + \alpha_i + \varepsilon_{it}\]
+\end{enumerate}
 
-Where \(\rho(\cdot)\) is the check function \citep{koenker1978},
-\(\mathbb{E}_{T}(\cdot) \equiv T^{-1} \sum_{t=1}^{T} (\cdot)\) and
-\(\mathbb{E}_{nT}(\cdot) \equiv (nT)^{-1} \sum_{t=1}^{T} \sum_{i=1}^n(\cdot)\).
-\citep{canay2011} defines this estimator as ``consistent and
-asymptotically normal". This stated, Canay's estimator stands out for
-its simplicity: Step 1 may be conveniently restated as obtaining the
-known within estimator of \(\beta\) and then subtracting the
-time-average residuals from the dependent variable. Next, using this
-simple transformation of the data, Step 2 tells us to obtain regression
-quantiles of \(\hat{Y}_{it}\) that are guaranteed to be consistent, as
-long as key assumptions hold.
+and esitmate \(\hat{\alpha}_i\).\footnote{Empirically, this can be done
+  using \texttt{reghdfe} command.}
 
-It is important to remark that consistency of Canay's estimator is
-obtained when \(T \rightarrow \infty\) \citep{canay2011}. Thus, the
-estimator at hand may perform poorly in contexts of panels with few time
-periods. In addition to this, the key assumption of the approach relies
-on the fact that the \(\alpha_i\)'s are pure location shifts: in other
-words, that the unobservable time-invariant characteristics grouped in
-\(\alpha_i\) have coefficients that are constant across \(\tau\)
-\citep{canay2011}. As \citep{mss2019} point out using simulated data,
-the estimator's performance deteriorates as the DGP features fixed
-effects that alter the entire distribution of interest, not only its
-location.
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Transform the dependent variable as
+  \(\tilde y_{it}=y_{it}-\hat{\alpha}_i\), and estimate the quantile
+  regression model:
+\end{enumerate}
 
-Regarding statistical inference, \citep{canay2011} provides a simple
-algorithm to obtain bootstrapped standard errors. The key in this
-procedure is to compute the two step estimator for each bootstrap
-sample, avoiding the mistake of just sampling from the transformed data
-\(\hat{Y}_{it}\). As \citep{canay2011} remarks, the algorithm should be
-such that it computes the first step estimators \(\hat{\beta}_{\mu}\)
-and \(\hat{\alpha}_i\) for each repetition.
+\[q_{\tau}(y_{it}-\hat \alpha_i|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)\]
 
-Finally, we propose a Modified Canay estimator in which, instead of
-subtracting out the estimated fixed effects \(\hat{\alpha}_i\) from the
-dependent variable \(Y_{it}\), they are included as regressors in
-equation \hyperref[eq:qreg_canay]{{[}eq:qreg\_canay{]}}. In stark
-contrast to the CRE estimator (see section \hyperref[sec:cre]{3}), the
-Modified Canay only adds \(W\) variables to the estimation, which makes
-it preferable in contexts of a small sample size when our goal is to
-estimate only location shift effects. However, we must be aware of the
-fact that the requirement of \(T \rightarrow \infty\) for consistency
-may not be met, especially for short panels.
+This simple approach allows for the identification of the quantile
+coefficients, by imposing the assumption that the unobserved effect is a
+pure location shift. And like the CRE model, it can be extended to
+multiple fixed effects, as long as one is willing to assume that the
+unobserved effects are pure location shifts. For example, consider a
+case with two fixed effects dimensions (individual and time), the model
+could be written as:
 
-Describe the implementation in Stata here.
+\[y_{it} = x_{it}\beta + \alpha_i + \alpha_t + \varepsilon_{it}\]
 
-\begin{longtable}[]{@{}lll@{}}
-\caption{as}\tabularnewline
-\toprule\noalign{}
-Column 1 & Column 2 & Column 3 \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-Column 1 & Column 2 & Column 3 \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Data 1 & Data 2 & Data 3 \\
-Data 4 & Data 5 & Data 6 \\
-\end{longtable}
+As before \(\alpha_i\) and \(\alpha_t\), assumed constant across
+quantiles, could be estimated using OLS, and the quantile regression
+model estimated using the transformed dependent variable.
 
-Tables \hyperref[tab:canay_results]{2} and
-\hyperref[tab:mcanay_results]{3} display the results of Canay and
-Modified Canay estimations using the \citep{persson2007} dataset of
-government expenditures. Once again, the median coefficients are close
-to the mean coefficient from the original paper, with the Canay
-estimator delivering the closest coefficient to 2.36. Even further,
-statistical significance is achieved for the median coefficient in table
-\hyperref[tab:canay_results]{2}, strengthening our reasoning on degrees
-of freedom above. Otherwise, we still obtain positive coefficients of
-the coalition variable at the 25th and 75th percentile of government
-spending.
+\[q_{\tau}(y_{it}-\hat \alpha_i - \hat \alpha_t|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)
+\]
 
-It is also worth stating the increasing monotonic pattern of quantile
-coefficients of coalition in table \hyperref[tab:mcanay_results]{3},
-conveying us that the effect of a permanent switch from single-party to
-coalition governments increases as we move toward greater government
-spending. Finally, note that even after explicitly accounting for
-country and period of legislature fixed effects in the Modified Canay
-estimator, the median coefficient remains stable, although it is no
-longer significant.
+Which again can be easily estimated using standard quantile regression
+methods.
 
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-Column 1 & Column 2 & Column 3 \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Data 1 & Data 2 & Data 3 \\
-Data 4 & Data 5 & Data 6 \\
-\end{longtable}
+\subsection{Modified Canay(2011) Estimator}\label{sec-mcanay}
 
-\phantomsection\label{tab:mcanay_results}{}
+Perhaps one of the main limitations of the Canay estimator is that it
+assumes that the unobserved effect is a pure location shift. If this
+assumption is violated, it may lead to inconsistent estimates of the
+quantile coefficients. To address this limitation, we propose a small
+modification to the Canay estimator.
 
-\section{Method of Moments Quantile Regression}\label{sec:mmqreg}
+We start by assuming that the unobserved effect represents some
+characteristics of the individual that are constant across quantiles,
+and that can be compared across individuals. Under this consideration,
+the data generating process can be written as:
+
+\[y_{it} =\beta_0(\rho_{it}) +  \beta_1(\rho_{it}) x_{it} + \gamma(\rho_{it}) \alpha_i
+\]
+
+Next, similar to \citet{canay2011}, we propose to estimate the
+unobserved effect \(\alpha_i\) using OLS, and assume that, in average
+the \(E[\gamma(\rho_{it})]=1\). Up to this point, the estimator is the
+same as the Canay estimator. However, we propose that instead of
+imposing \(\gamma(\rho_{it}) \alpha_i\) to be constant across quantiles,
+we allow for the prediction of the unobserved effect \(\alpha_i\) to
+vary across quantiles. This can be done by estimating the following
+model:
+
+\[q_{\tau}(y_{it}|x_{it},\hat \alpha_i) =  x_{it}\beta(\tau)+\gamma(\tau) \hat\alpha_i
+\]
+
+As before, this model can be extended to multiple fixed effects, by
+simply estimating the unobserved effects using OLS, and then estimating
+the quantile regression model using the predicted unobserved effects.
+The main advantage over \citet{canay2011} is that this estimator allows
+for the unobserved effect to have a different impact on the dependent
+variable across quantiles, which may be more realistic in many
+applications. However, it assumes the OLS estimator does allow for the
+consistent estimation of an unobserved effect that is comprarable across
+individuals, which may not always be the case.
+
+\subsection{\texorpdfstring{Method of Moments Quantile Regression
+\citet{mss2019}}{Method of Moments Quantile Regression @mss2019}}\label{sec-mmqr}
 
 This approach of estimating regression quantiles with multiple fixed
 effects distinguishes itself from the other estimators reviewed above in
@@ -695,8 +651,6 @@ Column 1 & Column 2 & Column 3 \\
 Data 1 & Data 2 & Data 3 \\
 Data 4 & Data 5 & Data 6 \\
 \end{longtable}
-
-\phantomsection\label{tab:mmqreg_results}{}
 
 As we allow for both location and scale shifts in our estimation method,
 the monotonic pattern observed in the first row of table
