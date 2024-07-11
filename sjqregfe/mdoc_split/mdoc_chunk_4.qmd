@@ -1,0 +1,13 @@
+However, it does provide few advantages over the other approaches. First, as suggested by @mss2019, with a sufficiently flexible specification of the scale component, the MMQR estimator can capture most of the important features related to the heterogenous effect of the covariates on the dependent variable. Second, because of the identification assumptions, this estimator avoids the problem of quantile crossing, which is common in other quantile regression models. Nevertheless, it is important to note that the MMQR estimator may not be applicable in all cases. 
+
+ # Implementation: `qregfe` and `mmqreg` {#sec-implementation}
+
+ In this section we present the commands `qregfe` and `mmqreg` for the estimation of quantile regression models with fixed effects, which implement the methodologies described in the previous section.  
+
+ Both commands follow a similar syntax: 
+
+ ```
+qregfe depvar indepvars, q(#) [options]
+```
+
+# Conclusions {#sec:conclusions}

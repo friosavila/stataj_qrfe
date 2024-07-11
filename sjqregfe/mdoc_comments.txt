@@ -1,0 +1,16 @@
+Explanations for mdoc_proofread_1.qmd:
+1. No major changes were required.
+
+Explanations for mdoc_proofread_2.qmd:
+1. Corrected several spelling errors, such as "ommited" to "omitted", "Mundlack" to "Mundlak", and "rutines" to "routines".
+2. Improved sentence structure and clarity in several paragraphs.
+3. Ensured that all special formatting, such as equations, code blocks, and citations, were preserved correctly.
+4. Removed unnecessary spaces between dollar signs and opening curly braces in equations.
+
+Explanations for mdoc_proofread_3.qmd:
+1. No major changes were required.
+
+Explanations for mdoc_proofread_4.qmd:
+1. Corrected the spelling of "a few" instead of "few".
+2. Corrected the spelling of "heterogeneous" instead of "heterogenous".
+
