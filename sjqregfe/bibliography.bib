@@ -12,6 +12,13 @@
   abstract={The widespread use of quantile regression methods depends crucially on the existence of fast algorithms. Despite numerous algorithmic improvements, the computation time is still non-negligible because researchers often estimate many quantile regressions and use the bootstrap for inference. We suggest two new fast algorithms for the estimation of a sequence of quantile regressions at many quantile indexes. The first algorithm applies the preprocessing idea of Portnoy and Koenker (Stat Sci 12(4):279–300, 1997) but exploits a previously estimated quantile regression to guess the sign of the residuals. This step allows for a reduction in the effective sample size. The second algorithm starts from a previously estimated quantile regression at a similar quantile index and updates it using a single Newton–Raphson iteration. The first algorithm is exact, while the second is only asymptotically equivalent to the traditional quantile regression estimator. We also apply the preprocessing idea to the bootstrap by using the sample estimates to guess the sign of the residuals in the bootstrap sample. Simulations show that our new algorithms provide very large improvements in computation time without significant (if any) cost in the quality of the estimates. For instance, we divide by 100 the time required to estimate 99 quantile regressions with 20 regressors and 50,000 observations.}
 }
 
+@techreport{wooldridge2021,
+  author = {Wooldridge, Jeffrey M.},
+  title = {Two-Way Fixed Effects, the Two-Way Mundlak Regression, and Difference-in-Differences Estimators},
+  year = {2021},
+  type = {Working Paper},
+  note = {Available at SSRN: https://ssrn.com/abstract=3906345}
+}
 @book{camerontrivedi2013,
   author    = {A. Colin Cameron and Pravin K. Trivedi},
   title     = {Regression Analysis of Count Data},
@@ -120,7 +127,7 @@ abstract = {The paper examines the relationship between heterogeneity bias and s
 
 @book{wooldridge2010,
   title={Econometric analysis of cross section and panel data},
-  author={Wooldridge, Jeffrey M},
+  author={Wooldridge, Jeffrey M.},
   year={2010},
   publisher={MIT press}
 }
@@ -464,7 +471,7 @@ year = {2006}
  year = {1948}
 }
 
- @unpublished{melly2023,
+@unpublished{melly2023,
   author = {Melly, Blaise and Pons, Martina},
   title = {Minimum Distance Estimation of Quantile Panel Data Models},
   year = {2023},
@@ -709,5 +716,35 @@ year = {2016}
 	number = {2},
 	doi = {10.1111/j.1368-423x.2012.00389.x},
 	url = {http://dx.doi.org/10.1111/j.1368-423X.2012.00389.x},
+	langid = {en}
+}
+
+@article{bottai2019,
+	title = {qmodel: A command for fitting parametric quantile models},
+	author = {Bottai, Matteo and Orsini, Nicola},
+	year = {2019},
+	month = {06},
+	date = {2019-06},
+	journal = {The Stata Journal: Promoting communications on statistics and Stata},
+	pages = {261--293},
+	volume = {19},
+	number = {2},
+	doi = {10.1177/1536867x19854002},
+	url = {http://dx.doi.org/10.1177/1536867X19854002},
+	langid = {en}
+}
+
+@article{besstremyannaya2019,
+	title = {Reconsideration of a simple approach to quantile regression for panel data},
+	author = {Besstremyannaya, Galina and Golovan, Sergei},
+	year = {2019},
+	month = {09},
+	date = {2019-09-01},
+	journal = {The Econometrics Journal},
+	pages = {292--308},
+	volume = {22},
+	number = {3},
+	doi = {10.1093/ectj/utz012},
+	url = {http://dx.doi.org/10.1093/ectj/utz012},
 	langid = {en}
 }
