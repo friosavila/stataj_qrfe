@@ -148,7 +148,7 @@ The World Bank\\Washington, DC\\
 
 \begin{abstract}
 
-This is an example of StataJ article made by me.
+This is an example of StataJ article made by me
 
 \keywords{\inserttag, Stata, LaTeX, Quarto, StataJ}
 \end{abstract}
@@ -170,7 +170,7 @@ extending quantile regression analysis in a panel data setting to
 account for unobserved, but time-fixed heterogeneity. This is
 particularly important in empirical research, where unobserved
 heterogeneity can bias estimates of the effects of interest. However, as
-it is common in the estimation of non-linear models with fixed effects,
+is common in the estimation of non-linear models with fixed effects,
 introducing fixed effects in quantile regression models poses several
 challenges. On the one hand, the simple inclusion of fixed effects can
 lead to an incidental parameter problem, which can bias estimates of the
@@ -208,8 +208,8 @@ To address this, in this paper we introduce two Stata commands for
 estimating quantile regressions with multiple fixed effects:
 \texttt{mmqreg} and \texttt{qregfe}. The first command \texttt{mmqreg}
 is an extension of the method of moments quantile regression estimator
-proposed by \citet{mss2019}. The second \texttt{qregfe} implements three
-other approaches: an implementation of a correlated random effects
+proposed by \citet{mss2019}. The second \texttt{qregfe}, implements
+three other approaches: an implementation of a correlated random effects
 estimator based on \citet{abrevaya2008}, \citet{wooldridge2019} and
 \citet[Ch12.10.3]{wooldridge2010}; the estimator proposed by
 \citet{canay2011}, and a proposed modification of this approach. In
@@ -222,9 +222,9 @@ effects. First, they leverage existing Stata commands, as well as other
 community-contributed commands, to allow users to estimate quantile
 regression models and their standard errors under different assumptions.
 Second, they reduce the impact of the incidental parameters problem
-depending on the assumptions of the underlying data-generating process.
-In terms of standard errors, \texttt{mmqreg} allows for the estimation
-of analytical standard errors (see \citet{mss2019} and
+depending on the assumptions underlying the data generating process. In
+terms of standard errors, \texttt{mmqreg} allows for the estimation of
+analytical standard errors (see \citet{mss2019} and
 \citet{riosavila2024}), whereas \texttt{qregfe} emphasizes the use of
 bootstrap standard errors. Finally, both commands are designed to be
 user-friendly, allowing for the estimation of quantile regression models
@@ -236,7 +236,7 @@ describes the methods and formulas used by \texttt{mmqreg} and
 \texttt{qregfe} commands. Section 4 introduces the commands, along with
 a brief description of their syntax and options. Section 5 introduces an
 auxiliary command for the visualization of quantile regression models.
-Section 6 provides empirical applications demonstrating their use.
+Section 6 provides an empirical application demonstrating their use.
 Section 7 concludes.
 
 \section{The Basics}\label{sec-basics}
@@ -260,10 +260,10 @@ This expression indicates that, conditional on \(x\), the \(\tau\)-th
 quantile of \(y\) can be approximated by a linear function of \(X\).
 
 Under the assumption that the conditional quantile function is linear
-and correctly specified, a useful way to think about the data-generating
+and correctly specified, a useful way to think about the data generating
 process is to consider the following model:
 
-\begin{equation}\phantomsection\label{eq-dgp}{y_i = \beta_0(U_i)+x_i'\beta(U_i)
+\begin{equation}\phantomsection\label{eq-dgp}{y_i = \beta_0(U_i)+x_i'\beta(U_i) 
 }\end{equation}
 
 where \(U_i\) is a random variable that follows a uniform distribution.
@@ -274,7 +274,7 @@ individuals with the same characteristics. In addition, \(\beta_0\) and
   the use of Smooth varying coefficient models, except that the running
   variable is not observed.}
 
-As explained in \citet{wooldridge2010}, the coefficients of quantile
+As explained in \citet{wooldridge2010}, the coefficient of quantile
 regression models can be identified by minimizing the following loss
 function, with respect to \(\beta(\tau)\):
 
@@ -285,11 +285,11 @@ function, with respect to \(\beta(\tau)\):
 Where \(\rho_\tau(u)=u\big(\tau-I(u<0)\big)\) is the check function, and
 \(I(\cdot)\) is the indicator function. In essence, quantile regressions
 are estimating the parameters locally around the \(\tau\)-th quantile,
-although other approaches are possible \footnote{\citet{kaplan2017} for
+although other approaches are possible.\footnote{\citet{kaplan2017} for
   example uses a nonparametric approach that produces a smooth set of
-  beta coefficients. And \citet{bottai2019} proposes methods for
+  beta coefficients. And \citet{bottai2019}, proposes methods for
   estimating parametric quantile regression models, imposing parametric
-  restrictions on the quantile coefficients across the distribution.}.
+  restrictions on the quantile coefficients across the distribution.}
 
 Most commands for estimating quantile regression models focus on
 estimating the above loss function, using linear programming techniques,
@@ -297,12 +297,12 @@ while others like \citet{kaplan2017} (\texttt{sivqr}) and
 \citet{chernozhukov2022} (\texttt{qrprocess}) use other optimization
 techniques.
 
-When no unobserved heterogeneity is present, the quantile regression
-model can be easily implemented in a panel setting (see
+When no unobserved heterogeneity is present, quantile regression models
+can be easily implemented in a panel setting (see
 \citet{wooldridge2010}), using a pooled version of the model. However,
-when unobserved heterogeneity is present explicitly, the estimation of
+when unobserved heterogeneity is explicitly present, the estimation of
 quantile regressions is more challenging. Consider the case of panel
-data and the following data-generating process:
+data and the following data generating process:
 
 \begin{equation}\phantomsection\label{eq-dgp-panel}{y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i(U_{it})
 }\end{equation}
@@ -311,12 +311,11 @@ Where \(U_{it}\) is a random variable that follows a uniform
 distribution, and \(\alpha_i(U_{it})\) is the unobserved effect that
 varies across individuals. In this case, the conditional quantile
 regression model can be written as:
-
-\begin{equation}\phantomsection\label{eq-feqr}{q_\tau(y_{it}|x_{it},\alpha_i(\tau))=\beta_0(\tau) + x_{it}'\beta(\tau)+\alpha_i(\tau)
+\begin{equation}\phantomsection\label{eq-feqr}{q_\tau(y_{it}|x_{it},\alpha_i(\tau))=\beta_0(\tau) + x_{it}'\beta(\tau)+\alpha_i(\tau) 
 }\end{equation}
 
-This specification is explicitly considering that the unobserved effect
-is identified for each \(i\)th observation, and that it varies across
+This specification explicitly considers that the unobserved effect is
+identified for each \(i\)th observation, and that it varies across
 quantiles (\(\alpha_i(\tau)\)). A common approach used, yet incorrect
 due to the incidental parameter problem, is to estimate this model by
 adding dummy variables for each individual in the quantile regression
@@ -334,10 +333,10 @@ Unfortunately, because the number of available observations per
 individual fixed effect is limited, they cannot be estimated with
 precision. In turn, the cumulative errors in the estimation of the fixed
 effects will also affect the conditional distribution of the outcome,
-which quantile regressions leverage on, leading to inconsistent
-estimates of all parameters. \footnote{This is similar to the measuring
-  error problem of dependent variables in quantile regression models
-  discussed in \citet{hausman2021}.}
+which quantile regressions leverage, leading to inconsistent estimates
+of all parameters.\footnote{This is similar to the measuring error
+  problem of dependent variables in quantile regression models discussed
+  in \citet{hausman2021}.}
 
 In the next section, we present a few solutions and implementations for
 the estimation of quantile regression models with multiple fixed
@@ -355,9 +354,11 @@ to time-varying covariates. And, in contrast with the random effects
 model, it does not make the assumption that the unobserved effect is
 uncorrelated with the observed covariates. Interestingly, in the context
 of linear models, the CRE model is equivalent to the fixed effects model
-\citep{wooldridge2010}. Consider the following model:
+\citep{wooldridge2010}.
 
-\begin{equation}\phantomsection\label{eq-cre-1}{y_{it} = \beta_0 + x_{it}\beta + \alpha_i + u_{it}
+Consider the following model:
+
+\begin{equation}\phantomsection\label{eq-cre-1}{y_{it} = \beta_0 + x_{it}\beta  + \alpha_i + u_{it}
 }\end{equation}
 
 It is well known that if \(\alpha_i\) is correlated with \(x_{it}\), the
@@ -369,7 +370,7 @@ projection of the observed time-varying variables plus an uncorrelated
 disturbance. Specifically:
 
 \begin{equation}\phantomsection\label{eq-cre-2}{\begin{aligned}
-Mundlack:  & & \alpha_i &= \gamma_0 + \bar x_{i}\gamma + v_i&  \\\\
+Mundlak:  & & \alpha_i &= \gamma_0 + \bar x_{i}\gamma + v_i&  \\
 Chamberlain: & & \alpha_i &= \gamma_0 + x_{i1}\gamma_1 + x_{i2}\gamma_2 + \dots + x_{iT}\gamma_T + v_i 
 \end{aligned}
 }\end{equation}
@@ -383,14 +384,14 @@ Using either model specification, if we substitute
 Equation~\ref{eq-cre-2} into Equation~\ref{eq-cre-1}, the final model
 can be written as:
 
-\begin{equation}\phantomsection\label{eq-cre-final}{y_{it} = \beta_0 + x_{it}\beta + \gamma_0 + f(x_{it})\Gamma + v_i + u_{it}
+\begin{equation}\phantomsection\label{eq-cre-final}{y_{it} = \beta_0 + x_{it}\beta  + \gamma_0 + f(x_{it})\Gamma + v_i + u_{it}
 }\end{equation}
 
 where \(f(x_{it})\) can be the full set of time-varying variables or
 just the average of them. Notice that in this specification, \(\beta_0\)
 and \(\gamma_0\) cannot be independently identified, and that the new
 model now has a compound error \(v_i + u_{it}=\mu_it\), which is
-uncorrelated with \(x_{it}\). To account for the within individual
+uncorrelated with \(x_{it}\). To account for the within-individual
 correlation driven by \(v_i\), the CRE model should be estimated using
 either random effects, or clustering standard errors at the individual
 level (see \citet{wooldridge2010} for a discussion). Interestingly,
@@ -444,18 +445,17 @@ the distribution of the compound error \(v^{U_{it}}_i\) and \(U_{it}\),
 which may lead to inconsistent estimates of the quantile coefficients.
 \footnote{This is the main critique raised by \citet{canay2011} to the
   estimator proposed by \citet{abrevaya2008}. In fact, the more dominant
-  becomes \(v^{U_{it}}_i\), the more the estimates will resemble the OLS
+  \(v^{U_{it}}_i\) becomes, the more the estimates will resemble the OLS
   estimates.}
 
 Nevertheless, assuming that the residual \(v^{U_{it}}_i\) is small, the
-CRE-quantile regression approach has few other benefits that may be of
+CRE-quantile regression approach has a few other benefits that may be of
 interest. First, as discussed in \citet{wooldridge2019}, it can be
 easily used in the presence of unbalanced panels. Second, it may also
 provide an approach to control for multiple fixed effects. \footnote{\citet{baltagi2023}
   and \citet{wooldridge2021} discuss this for the two-way Mundlak
-  estimator.}. For example, let us expand on
-Equation~\ref{eq-dgp-panel}, and consider the case of a two-way fixed
-effects model:
+  estimator.} For example, let us expand on Equation~\ref{eq-dgp-panel},
+and consider the case of a two-way fixed effects model:
 
 \[y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i(U_{it}) + \alpha_t(U_{it})
 \]
@@ -469,11 +469,11 @@ representation of the unobserved effects:
 where \(\lambda_i^x\) and \(\lambda_t^x\) are obtained by estimating the
 following model for each explanatory variable \(x_{it}\):
 
-\begin{equation}\phantomsection\label{eq-cre-2way}{x_{it} - \bar x = \lambda_i^x + \lambda_t^x + \epsilon_{it}
+\begin{equation}\phantomsection\label{eq-cre-2way}{x_{it} -\bar x = \lambda_i^x + \lambda_t^x + \epsilon_{it}
 }\end{equation}
 
 We use the centered transformation of the explanatory variable, that is
-\(x_{it}-\bar x\), so that all \(\lambda\)'s have an expected value of
+\(x_{it}-\bar x\), so that all \(\lambda's\) have an expected value of
 zero. In contrast with \citet{baltagi2023}, we suggest that rather than
 modeling each individual component separately, it is easier to think of
 the problem of modeling the combination of the two (or many) unobserved
@@ -511,7 +511,7 @@ errors at the individual level. For the quantile regression model,
 clustering standard errors at the individual level is also suggested by
 \citet{wooldridge2010}, and some routines already implement this
 feature. When multiple fixed effects are considered, it is suggested to
-use the bootstrap methods for the estimation of the standard errors.
+use bootstrap methods for the estimation of the standard errors.
 
 \subsection{Canay (2011) Estimator}\label{sec-canay}
 
@@ -531,7 +531,7 @@ The location-scale model. Under this specification, consider the
 following data generating process:
 
 \begin{equation}\phantomsection\label{eq-loc-scale}{\begin{aligned}
-y_i &= \beta_0+\beta_1 x_i + \gamma_0(U_i) + \gamma_1(U_i) x_{i} \ \text{or} \\
+y_i &= \beta_0+\beta_1 x_i + \gamma_0(U_i) + \gamma_1(U_i) x_{i}  \text{or} \\
 y_i &= \beta_0+\beta_1 x_i + \mu_i
 \end{aligned}
 }\end{equation}
@@ -549,10 +549,10 @@ term \(\mu_i\).
 This provides three insights. First, that OLS could be used to identify
 the location effect of \(x_i\) on \(y_i\), which we know as the average
 or conditional mean effect. Second, if \(\gamma_1(U_i)\) is different
-from zero, the model is heteroskedastic, and the quantile regression
-could be used to identify this type of unobserved heterogeneity. Lastly,
-if a covariate has no scale effect, all quantile coefficients will be
-the same as the OLS coefficient.
+from zero, the model is heteroskedastic, and quantile regression could
+be used to identify this type of unobserved heterogeneity. Lastly, if a
+covariate has no scale effect, all quantile coefficients will be the
+same as the OLS coefficient.
 
 Although of little use, this location-scale model can be easily
 estimated using a two-step approach. First, estimate the location effect
@@ -579,19 +579,18 @@ across quantiles. More explicitly, the data generating process in a
 panel data setting can be written as follows:
 
 \begin{equation}\phantomsection\label{eq-canay-dgp}{y_{it} = \beta_0(U_{it}) + x_{it}\beta(U_{it}) + \alpha_i
+}\end{equation} which imply that the conditional quantile regression
+model can be written as:
+
+\begin{equation}\phantomsection\label{eq-canay-qreg}{q_\tau(y_{it}|x_it,\alpha_i) = \beta_0(\tau) + x_{it}\beta(\tau) + \alpha_i
 }\end{equation}
-
-which imply that the conditional quantile regression model can be
-written as:
-
-\begin{equation}\phantomsection\label{eq-canay-qreg}{q_\tau(y_{it}|x_it,\alpha_i) = \beta_0(\tau) + x_{it}\beta(\tau) + \alpha_i}\end{equation}
 
 This assumption has important implications for the identification of the
 quantile regression coefficients. First, by assuming that \(\alpha_i\)
 is a pure location shift, it reduces the number of parameters that need
 to be estimated in the model, because \(\alpha_i\) can now be estimated
 globally, while the quantile regression coefficients can be estimated
-locally. Second, based on the previous insights of the location-scale
+locally. Second, based on the previous insights of the location scale
 model, it suggests that we can estimate the quantile regression model
 using a two-step approach. First, estimate all location effects using
 OLS, and then estimate the scale effects using the predicted residuals,
@@ -607,7 +606,8 @@ described as follows:
   heterogeneity \(\alpha_i\) on \(y_{it}\) using OLS:
 \end{enumerate}
 
-\[y_{it}=\beta_0 + x_{it}' \beta_1 +\alpha_i + \varepsilon_{it}\]
+\[y_{it}=\beta_0 +  x_{it}' \beta_1   +\alpha_i + \varepsilon_{it}
+\]
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -621,7 +621,8 @@ described as follows:
   regression model:
 \end{enumerate}
 
-\[q_{\tau}(\tilde y_{it}|x_{it}) = \beta_0(\tau)+x_{it}'\beta_1(\tau)\]
+\[q_{\tau}(\tilde y_{it}|x_{it}) = \beta_0(\tau)+x_{it}'\beta_1(\tau)
+\]
 
 This simple approach allows for the identification of the quantile
 coefficients, by imposing the assumption that the unobserved
@@ -633,7 +634,8 @@ effects dimensions (individual and time), under the assumption that the
 unobserved effects are pure location shifts, the data generating process
 can be written as:
 
-\begin{equation}\phantomsection\label{eq-canay-dgp-2way}{y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i + \alpha_t}\end{equation}
+\begin{equation}\phantomsection\label{eq-canay-dgp-2way}{y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i + \alpha_t
+}\end{equation}
 
 As before, if we assume that \(\alpha_i\) and \(\alpha_t\) are constant
 across quantiles, we could use the same two-step approach to estimate
@@ -641,7 +643,8 @@ the quantile regression coefficients. First, estimate the location
 effects using OLS, and then estimate the quantile regression model using
 the predicted fixed effects.
 
-\begin{equation}\phantomsection\label{eq-canay-mway}{q_{\tau}(y_{it}-\hat \alpha_i - \hat \alpha_t|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)}\end{equation}
+\begin{equation}\phantomsection\label{eq-canay-mway}{q_{\tau}(y_{it}-\hat \alpha_i - \hat \alpha_t|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)
+}\end{equation}
 
 Which again can be easily estimated using standard quantile regression
 methods, and extended to any number of fixed effects.
@@ -653,7 +656,7 @@ assumes that the unobserved effect is a pure location shift. In fact,
 this is one of the criticisms raised by \citet{mss2019} to the
 estimator. While this makes sense intuitively, because an individual
 will only be assigned to a single rank at a given point in time, it is
-not consistent with the idea that the unobserved effect is, in fact, a
+not consistent with the idea that the unobserved effect is in fact a
 proxy for an unobserved characteristic of the individual, and that
 characteristic could have a different impact on the dependent variable
 across quantiles. In this case, if this assumption is violated, it may
@@ -665,7 +668,9 @@ characteristics of the individual that are constant across quantiles,
 and that can be compared across individuals. Under this consideration,
 the data generating process can be written as:
 
-\begin{equation}\phantomsection\label{eq-mcanay-dgp}{y_{it} =\beta_0 + x_{it}'\beta + \beta_\alpha \alpha_i+ \gamma_0(U_{it}) + x_{it}'\gamma(U_{it}) + \gamma_\alpha(U_{it}) \alpha_i}\end{equation}
+\begin{equation}\phantomsection\label{eq-mcanay-dgp}{y_{it} =\beta_0 +   x_{it}'\beta + \beta_\alpha \alpha_i+
+\gamma_0(U_{it}) +  x_{it}'\gamma(U_{it}) + \gamma_\alpha(U_{it}) \alpha_i
+}\end{equation}
 
 Where \(\alpha_i\) is the unobserved effect, \(\beta_\alpha\) is the
 location coefficient of the unobserved heterogeneity, and
@@ -681,7 +686,8 @@ the quantile regression model using the predicted unobserved effects as
 an additional explanatory variable. This can be done by estimating the
 following model:
 
-\[q_{\tau}(y_{it}|x_{it},\hat \alpha_i) = x_{it}\beta(\tau)+\beta(\tau) \hat\alpha_i\]
+\[q_{\tau}(y_{it}|x_{it},\hat \alpha_i) =  x_{it}\beta(\tau)+\beta(\tau) \hat\alpha_i
+\]
 
 As before, this model can be extended to multiple fixed effects, by
 simply estimating the unobserved effects using OLS, and then estimating
@@ -710,7 +716,7 @@ by \citet{riosavila2024}. The methodology was proposed as a feasible
 approach to incorporate fixed effects in a quantile regression model,
 allowing for unobserved effects to have a different impact on the
 dependent variable across quantiles. This is done by separating the
-identification of quantile coefficients into a location, scale, and
+identification of quantile coefficients into a location, scale and
 quantile effect, using a method of moments approach.
 
 To understand this approach, let's consider the data generating process
@@ -718,26 +724,27 @@ from Equation~\ref{eq-loc-scale}. As mentioned earlier, this approach
 suggests that a quantile regression model can be identified using a
 location-scale model, where the location effect shows the average effect
 of the covariates on the dependent variable, and the scale effect shows
-the heterogeneous effect of the covariates, as a deviation from the
-location effect. \citet{mss2019} extends this idea by suggesting that
-the scale component can be further decomposed into a pure scale effect
+the heterogeneous effect of the covariates, as deviation from the
+location effect. \citet{mss2019} extends this idea, by suggesting that
+the scale component can be further decomposed into a pure scale effect,
 and a mediating factor. Specifically, the author considers the case
 where the data generating process can be written as:
 
 \begin{equation}\phantomsection\label{eq-dgp_mmqreg}{\begin{aligned}
-Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*\mu_i) \text{ or} \\
-Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*F^{-1}(U_i)) \text{ or}
-\end{aligned}}\end{equation}
+Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*\mu_i) \text{ or} \\\\
+Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*F^{-1}(U_i)) \text{ or} 
+\end{aligned}
+}\end{equation}
 
 This specification assumes that \(\mu_i\) is an identically and
 independently distributed random variable with any arbitrary
 distribution. \(\delta_0 + X_{i}' \delta\) denotes the multiplicative
-scale component (heteroskedasticity-generating component), and
+scale component (heteroskedasticity generating component), and
 \(\beta_0 + x_{i}' \beta\) denotes the location coefficients. The second
-line in Equation~\ref{eq-dgp_mmqreg} represents the same model, but
+line in Equation~\ref{eq-dgp_mmqreg}, represents the same model, but
 using the inverse of the distribution function of \(U_i\) as the
 mediating factor. As before, \(U_i\) is a random variable that follows a
-uniform distribution and captures the rank of the individual among all
+uniform distribution, and captures the rank of the individual among all
 individuals with the same characteristics.
 
 What is interesting about this specification is that it simplifies the
@@ -779,14 +786,15 @@ follows:\footnote{Further details on the implementation of the
 \tightlist
 \item
   Obtain a standardized residual by dividing the residuals of (1) by the
-  predicted scale effect from (2), and estimate the \(\tau\)th
+  predicted scale effect from (2), and estimate the \(\tau th\)
   unconditional quantile of this distribution:
 \end{enumerate}
 
 \[\begin{aligned}
-\hat \mu_i &= \frac{\hat R_i}{\delta_0 + x_{i}' \delta} \\
+\hat \mu_i &= \frac{\hat R_i}{\delta_0 + x_{i}' \delta} \\\\
 q_{\tau}(\hat \mu_i) &= q_0(\tau)
-\end{aligned}\]
+\end{aligned}
+\]
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -797,17 +805,18 @@ q_{\tau}(\hat \mu_i) &= q_0(\tau)
   following equation:
 \end{enumerate}
 
-\[\beta_{\tau} = \beta + q_0(\tau) \delta\]
+\[\beta_{\tau} = \beta + q_0(\tau) \delta
+\]
 
 It can be seen that because Steps 1 and 2 are estimated globally using
 OLS, they can easily be extended to multiple fixed effects, without
 major difficulties. One can simply assume, for example, that the fixed
 effects are estimated using a dummy variable approach, and all the steps
-described above follow.\footnote{In \citet{riosavila2024}, additional
+described above follow. \footnote{In \citet{riosavila2024}, additional
   steps are presented because of the use of partial-out covariates.
   However, the same results can be obtained using the simpler approach
   described here.} The derivation of standard errors follows from the
-use of the method of moments approach and the identification of the
+use of the method of moments approach, and the identification of the
 empirical influence functions.
 
 Despite the flexibility of this approach, it is important to note that
@@ -815,7 +824,7 @@ the MMQR estimator is based on the assumption that all quantile
 coefficients are constructed as a simple combination of the location and
 scale coefficients. They only differ in the value of the mediating
 factor, the unconditional quantile of the standardized residual. This
-may be a strong assumption and may not be applicable in all cases.
+may be a strong assumption, and may not be applicable in all cases.
 However, it does provide a few advantages over the other approaches.
 First, as suggested by \citet{mss2019}, with a sufficiently flexible
 specification of the scale component, the MMQR estimator can capture

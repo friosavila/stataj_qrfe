@@ -324,3 +324,18 @@ qregfe depvar indepvars, q(#) [options]
 ```
 
 # Conclusions {#sec:conclusions}
+
+$$
+\underbrace{(\hat{q}_\theta(y_m) - \hat{q}_\theta(y_w))}_{\text{raw difference}} = 
+\underbrace{
+    \{
+    \underbrace{(\overline{X}_c - \overline{X}_m)' \hat{\beta}_m^\theta}_{\text{pure composition effect}} + 
+    \underbrace{\overline{X}_c' (\hat{\beta}_c^\theta - \hat{\beta}_m^\theta)}_{\text{specification error}}
+    \}
+}_{\text{composition effect}} + 
+\underbrace{
+    \{
+    \underbrace{\overline{X}_w' (\hat{\beta}_w^\theta - \hat{\beta}_c^\theta)}_{\text{pure structure effect}} + 
+    \underbrace{(\overline{X}_w - \overline{X}_c)' \hat{\beta}_c^\theta}_{\text{reweighting error}}
+    \}
+}_{\text{structure effect}}$$
