@@ -57,7 +57,7 @@ program define qregfe , eclass
             }
         }
 
-        if "`cre'`cre1'"!="" {
+/*        if "`cre'`cre1'"!="" {
             capture which cre
             if _rc!=0 {
                 display as error "cre is not installed. Please install it from GitHub"
@@ -67,7 +67,7 @@ program define qregfe , eclass
                 error 102
             }
 
-        }
+        }*/
         
         /*** IF CANAY ***/
         if "`canay'`canay1'"!="" {

@@ -247,3 +247,4 @@ program myhdmean, rclass
 	if "`dropvlist'"!="" drop `dropvlist'
 	
 end
+

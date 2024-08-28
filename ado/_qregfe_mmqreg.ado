@@ -14,9 +14,9 @@ end
 program _qregfe_mmqreg, eclass
     syntax varlist(fv ts) [if] [in] [pw iw], ///
                         [Quantile(str asis) ///
-                        ls ABSorb(varlist)] 
+                        ls ABSorb(varlist) *] 
     marksample touse
-    markout `touse' `abs'
+    markout `touse' `absorb'
     gettoken y x:varlist
     // ls show?
     if "`ls'"!="" local ls 1
@@ -28,7 +28,7 @@ program _qregfe_mmqreg, eclass
         local qlist `r(numlist)'
     }    
     // Step 1: Location 
-    if "`abs'"!="" qui: reghdfe `y' `x' if `touse' [`weight'`exp'], abs(`absorb') resid keepsingletons verbose(-1)  
+    if "`absorb'"!="" qui: reghdfe `y' `x' if `touse' [`weight'`exp'], abs(`absorb') resid keepsingletons verbose(-1)  
     else           qui: reghdfe `y' `x' if `touse' [`weight'`exp'], noabs         resid  keepsingletons verbose(-1)
     tempname b1
     matrix `b1'=e(b)
@@ -38,7 +38,7 @@ program _qregfe_mmqreg, eclass
     ren _reghdfe_resid `r1'
     qui:gen double `ar1' = abs(`r1')
     // Step 2: Scale
-    if "`abs'"!="" qui: reghdfe `ar1' `x' if `touse' [`weight'`exp'], abs(`absorb') resid keepsingletons verbose(-1)
+    if "`absorb'"!="" qui: reghdfe `ar1' `x' if `touse' [`weight'`exp'], abs(`absorb') resid keepsingletons verbose(-1)
     else           qui: reghdfe `ar1' `x' if `touse' [`weight'`exp'], noabs         resid  keepsingletons verbose(-1)
     // predict hat_ar1
     tempname b2
