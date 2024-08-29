@@ -339,12 +339,20 @@ The main options for the command are:
   - `canay`: @canay2011 estimator
   - `canay(modified)`: Modified @canay2011 estimator
   - `mmqreg`: @mss2019 estimator. This is the only estimator also has its on command `mmqreg`.
-- `qmethod()`: Specifies the method used to estimate the quantile regression component. The default is `qreg`, but any other quantile regression command can be used. This will affect how `quantile(#)` is specified.
+- `qmethod(,qmethod_options)`: Specifies the method used to estimate the quantile regression component. The default is `qreg`, but any other quantile regression command can be used. This will affect how `quantile(#)` is specified.
+  - If necessary, one can also request `qmethod_options` that are specific to the quantile regression command used.
 -  `q(#)`: specifies the specific quantile for which coefficients will be obtained. The default is the median `q(50)`. The values this could take depend on the `qmethod()` used. For example, if using `qmethod(sqreg)`, one could specify `q(10 25 90)` to obtain the 10th, 25th, and 90th quantiles. However, if one uses `qmethod(qrprocess)` ^[`qrprocess` is a user-written command that uses a different algorithm for the estimation of quantile regression models.], one could specify `q(0.1 0.25 0.9)` to obtain the same quantiles. 
   If using `mmqreg`, multiple quantiles are always allowed.
--  `abs(varlist)`: specifies the variables that would be used to absorb the fixed effects. This is necessary for CRE
-
-
-
+-  `abs(varlist)`: specifies the variables that would be used to absorb the fixed effects. This is necessary for CRE and Canay estimators. For the `mmqreg` estimator, this is not necessary, as the estimator still works for the case of no fixed effects.
+-  `boot[(bootstrap_options)]`: request bootstrap standard errors to be computed.
+   -  if not specified, standard errors correspond to the default from `qmethod()`, except for `mmqreg`, which uses the gls standard errors, as proposed by @mss2019 and @riosavila2024.
+   -  `bootstrap options` are the standard options for the `bootstrap` in Stata, using the same results. 
+- `parallel`: request the estimation of bootstrap standard errors to be performed using `parallel` package (@vegayon2019)
+  - `parallel_cluster(#)` specifies the number of clusters to be used for the parallelization. The default is 2.
+- `seed(#)`: specifies the seed for the random number generator. The default is to use none.
+- `robust` and `cluster(varname)`: These options are available when using `mmqreg` estimator. They follow the derivations from  @riosavila2024, based on robust and cluster standard errors for gmm estimators..
+- `other_options`: Other options are also specific to the `qmethod()` used can also be passed to the command directly.
+  
+# 
 # Conclusions {#sec:conclusions}
 

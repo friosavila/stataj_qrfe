@@ -895,10 +895,17 @@ The main options for the command are:
     estimator also has its on command \texttt{mmqreg}.
   \end{itemize}
 \item
-  \texttt{qmethod()}: Specifies the method used to estimate the quantile
-  regression component. The default is \texttt{qreg}, but any other
-  quantile regression command can be used. This will affect how
-  \texttt{quantile(\#)} is specified.
+  \texttt{qmethod(,qmethod\_options)}: Specifies the method used to
+  estimate the quantile regression component. The default is
+  \texttt{qreg}, but any other quantile regression command can be used.
+  This will affect how \texttt{quantile(\#)} is specified.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    If necessary, one can also request \texttt{qmethod\_options} that
+    are specific to the quantile regression command used.
+  \end{itemize}
 \item
   \texttt{q(\#)}: specifies the specific quantile for which coefficients
   will be obtained. The default is the median \texttt{q(50)}. The values
@@ -912,8 +919,48 @@ The main options for the command are:
   \texttt{mmqreg}, multiple quantiles are always allowed.
 \item
   \texttt{abs(varlist)}: specifies the variables that would be used to
-  absorb the fixed effects. This is necessary for CRE
+  absorb the fixed effects. This is necessary for CRE and Canay
+  estimators. For the \texttt{mmqreg} estimator, this is not necessary,
+  as the estimator still works for the case of no fixed effects.
+\item
+  \texttt{boot{[}(bootstrap\_options){]}}: request bootstrap standard
+  errors to be computed.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    if not specified, standard errors correspond to the default from
+    \texttt{qmethod()}, except for \texttt{mmqreg}, which uses the gls
+    standard errors, as proposed by \citet{mss2019} and
+    \citet{riosavila2024}.
+  \item
+    \texttt{bootstrap\ options} are the standard options for the
+    \texttt{bootstrap} in Stata, using the same results.
+  \end{itemize}
+\item
+  \texttt{parallel}: request the estimation of bootstrap standard errors
+  to be performed using \texttt{parallel} package (\citet{vegayon2019})
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{parallel\_cluster(\#)} specifies the number of clusters to
+    be used for the parallelization. The default is 2.
+  \end{itemize}
+\item
+  \texttt{seed(\#)}: specifies the seed for the random number generator.
+  The default is to use none.
+\item
+  \texttt{robust} and \texttt{cluster(varname)}: These options are
+  available when using \texttt{mmqreg} estimator. They follow the
+  derivations from \citet{riosavila2024}, based on robust and cluster
+  standard errors for gmm estimators..
+\item
+  \texttt{other\_options}: Other options are also specific to the
+  \texttt{qmethod()} used can also be passed to the command directly.
 \end{itemize}
+
+\section{}\label{section}
 
 \clearpage
 
