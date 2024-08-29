@@ -347,7 +347,7 @@ effects.
 The first approach we discuss is the use of Correlated Random Effects
 (CRE) models for the estimation of quantile regression models. The CRE
 model is an alternative methodology for the estimation of fixed effects
-models that was proposed by \citet{mundlak1978} and later generalized by
+models that was proposed by \citet{mundlak1978} and generalized by
 \citet{chamberlain1982}. In contrast with standard fixed effects, the
 approach allows users to control for time fixed covariates in addition
 to time-varying covariates. And, in contrast with the random effects
@@ -541,18 +541,18 @@ the location parameters that capture how the whole distribution of
 \(y_i\) is affected by \(x_i\). In contrast, \(\gamma_0(U_i)\) and
 \(\gamma_1(U_i)\) are the scale parameters that capture the heterogenous
 effect of \(x_i\) on \(y_i\) that deviates from the location effect.
-When using a simple linear regression model, say via OLS, we could
+When using a simple linear regression model, estimated via OLS, we could
 assume that the compound component
 \(\gamma_0(U_i) + \gamma_1(U_i) x_{i}\) is fully captured by the error
 term \(\mu_i\).
 
 This provides three insights. First, that OLS could be used to identify
 the location effect of \(x_i\) on \(y_i\), which we know as the average
-or conditional mean effect. Second, \(\gamma_1(U_i)\) is different from
-zero, the model is heteroskedastic, and the quantile regression could be
-used to identify this type of unobserved heterogenity. Lastly, if a
-covariate has no scale effect, all quantile coefficients will be the
-same as the OLS coefficient.
+or conditional mean effect. Second, if \(\gamma_1(U_i)\) is different
+from zero, the model is heteroskedastic, and the quantile regression
+could be used to identify this type of unobserved heterogenity. Lastly,
+if a covariate has no scale effect, all quantile coefficients will be
+the same as the OLS coefficient, except for the constant.
 
 Although of little use, this location-scale model can be easily
 estimated using a two-step approach. First, estimate the location effect
@@ -639,11 +639,12 @@ can be written as:
 \begin{equation}\phantomsection\label{eq-canay-dgp-2way}{y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i + \alpha_t
 }\end{equation}
 
-As before if we assume that \(\alpha_i\) and \(\alpha_t\) are constant
-across quantiles, could use the same two-step approach to estimate the
-quantile regression coefficients. First, estimate the location effects
-using OLS, and then estimate the quantile regression model using the
-predicted fixed effects.
+As before, if we assume that \(\alpha_i\) and \(\alpha_t\) are constant
+across quantiles, we could use the same two-step approach to estimate
+the quantile regression coefficients. First, estimate the location
+effects using OLS, and then estimate the quantile regression model using
+the transformed dependent variable, after absorbing the predicted fixed
+effects.
 
 \begin{equation}\phantomsection\label{eq-canay-mway}{q_{\tau}(y_{it}-\hat \alpha_i - \hat \alpha_t|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)
 }\end{equation}
@@ -704,10 +705,10 @@ individuals, which may not always be the case.
 In terms of Standard errors, \citet{canay2011} provides some guidance
 for the derivation of analytical standard errors for their estimator.
 Recently, however, \citet{besstremyannaya2019} has shown that the
-standard errors derivations are incorrect. Instead, based on their
-recommendations, we suggest that the bootstrap method should be used for
-the estimation of the standard errors for both the Canay and Modified
-Canay estimators.
+analytical standard errors derivations are incorrect. Instead, based on
+their recommendations, we suggest that the bootstrap method should be
+used for the estimation of the standard errors for both the Canay and
+Modified Canay estimators.
 
 \subsection{\texorpdfstring{Method of Moments Quantile Regression
 \citet{mss2019}}{Method of Moments Quantile Regression @mss2019}}\label{sec-mmqr}
@@ -739,9 +740,9 @@ Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*F^{-1}(U_i)) \text{
 }\end{equation}
 
 This specification assumes that \(\mu_i\) is an identically and
-independently distributed random variable with any arbitray
-distribution. \(\delta_0 + X_{i}' \delta\) denotes the multiplative
-scale component (heteroskedasiticty generating component), and
+independently distributed random variable with any arbitrary
+distribution. \(\delta_0 + X_{i}' \delta\) denotes the multiplicative
+scale component (heteroskedasticty generating component), and
 \(\beta_0 + x_{i}' \beta\) denotes the location coefficients. The second
 line in Equation~\ref{eq-dgp_mmqreg}, represents the same model, but
 using the inverse of the distribution function of \(U_i\) as the
@@ -750,12 +751,11 @@ uniform distribution, and captures the rank of the individual among all
 individuals with the same characteristics.
 
 What is interesting about this specification is that it simplifies the
-identification of the quantile coefficients further, by impossing a
-strict parametric relationship across the scale coefficients.
-Specifically, that they are directly related to the values of \(\mu_i\)
-or \(F^{-1}(U_i)\). Thus, the location and scale coefficients can be
-identified globally, requiring only the local identification of the
-distribution of \(\mu_i\).
+identification of the quantile coefficients by impossing a strict
+parametric relationship across the quantile specific coefficients.
+Specifically, that the location and scale coefficients can be identified
+globally, requiring only the local identification of the distribution of
+\(\mu_i\) being necessary to identify all quantile coefficients.
 
 For this simple case, the MMQREG estimator can be decribed as
 follows:\footnote{Further details on the implementation of the
@@ -819,7 +819,14 @@ described above follow. \footnote{In \citet{riosavila2024}, additional
   However, the same results can be obtained using the simpler approach
   described here.} The derivation of standard errors follows from the
 use of the method of moments approach, and the identification of the
-empirical influence functions.
+empirical influence functions, based on the following moment conditions:
+
+\begin{equation}\phantomsection\label{eq-mmqreg-moments}{\begin{aligned}
+E[y_{i} - \beta_0 - x_{i}' \beta] &= 0 \\
+E[|y_{i} - \beta_0 - x_{i}' \beta|- \delta_0 + x_{i}' \delta] &= 0 \\
+E\left[ I\left(\frac{y_{i} - \beta_0 - x_{i}' \beta}{\delta_0 + x_{i}' \delta} < q_0(\tau)\right) \right] &= \tau
+\end{aligned}
+}\end{equation}
 
 Despite the flexibility of this approach, it is important to note that
 the MMQR estimator is based on the assumption that all quantile
@@ -833,23 +840,80 @@ specification of the scale component, the MMQR estimator can capture
 most of the important features related to the heterogenous effect of the
 covariates on the dependent variable. Second, because of the
 identification assumptions, this estimator avoids the problem of
-quantile crossing, which is common in other quantile regression models.
-Nevertheless, it is important to note that the MMQR estimator may not be
-applicable in all cases.
+quantile crossing\footnote{This requires that the linear model used to
+  model heteroskedasticity (\(X\delta\)) produces a strictly possitive
+  value, at least within the sample range.}, which is common in other
+quantile regression models. Nevertheless, it is important to note that
+the MMQR assumptions may not be applicable in all cases.
 
-\section{\texorpdfstring{Implementation: \texttt{qregfe} and
-\texttt{mmqreg}}{Implementation: qregfe and mmqreg}}\label{sec-implementation}
+\section{\texorpdfstring{Implementation:
+\texttt{qregfe}}{Implementation: qregfe}}\label{sec-implementation}
 
-In this section we present the commands \texttt{qregfe} and
-\texttt{mmqreg} for the estimation of quantile regression models with
-fixed effects, which implement the methodologies described in the
-previous section.
+While the estimation of the methods described above can be easily
+implemented using standard Stata commands, the process can be cumbersome
+and promp to errors. To address this, we introduce the Stata command
+\texttt{qregfe}. This command allows users to estimate quantile
+regression models with fixed effects using the CRE, Canay, and Modified
+Canay estimators, as well as the MMQR estimator.\footnote{The MMQR
+  estimator is also implemented by the \texttt{xtqreg} command, which
+  was provide by the authors. There is also \texttt{mmqreg}, which was
+  originally implemented as a stand alone command, but it is now
+  integrated within this command.} The command is designed to be
+user-friendly, allowing for the estimation of quantile regression models
+with fixed effects in a single line of code, with only minor changes for
+model estimation.
 
-Both commands follow a similar syntax:
+The command uses the standard Stata syntax:
 
 \begin{verbatim}
-qregfe depvar indepvars, q(#) [options]
+qregfe depvar [indepvars] [if] [in] [pw], quantile(#) [options]
 \end{verbatim}
+
+Where \texttt{depvar} is the dependent variable, \texttt{indepvars} are
+the independent variables, \texttt{if} and \texttt{in} are the standard
+Stata options. Because most of the estimators require the use of
+bootstrapping, canay and cre estimators do not allow for the use of
+weights. Only \citet{mss} estimator allows for it.
+
+The main options for the command are:
+
+\begin{itemize}
+\tightlist
+\item
+  Fixed effect estimator:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{cre}: Correlated Random Effects estimator
+  \item
+    \texttt{canay}: \citet{canay2011} estimator
+  \item
+    \texttt{canay(modified)}: Modified \citet{canay2011} estimator
+  \item
+    \texttt{mmqreg}: \citet{mss2019} estimator. This is the only
+    estimator also has its on command \texttt{mmqreg}.
+  \end{itemize}
+\item
+  \texttt{qmethod()}: Specifies the method used to estimate the quantile
+  regression component. The default is \texttt{qreg}, but any other
+  quantile regression command can be used. This will affect how
+  \texttt{quantile(\#)} is specified.
+\item
+  \texttt{q(\#)}: specifies the specific quantile for which coefficients
+  will be obtained. The default is the median \texttt{q(50)}. The values
+  this could take depend on the \texttt{qmethod()} used. For example, if
+  using \texttt{qmethod(sqreg)}, one could specify
+  \texttt{q(10\ 25\ 90)} to obtain the 10th, 25th, and 90th quantiles.
+  However, if one uses \texttt{qmethod(qrprocess)} \footnote{\texttt{qrprocess}
+    is a user-written command that uses a different algorithm for the
+    estimation of quantile regression models.}, one could specify
+  \texttt{q(0.1\ 0.25\ 0.9)} to obtain the same quantiles. If using
+  \texttt{mmqreg}, multiple quantiles are always allowed.
+\item
+  \texttt{abs(varlist)}: specifies the variables that would be used to
+  absorb the fixed effects. This is necessary for CRE
+\end{itemize}
 
 \clearpage
 

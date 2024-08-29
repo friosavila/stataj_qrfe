@@ -315,12 +315,12 @@ However, it does provide a few advantages over the other approaches. First, as s
 
 # Implementation: `qregfe` and `mmqreg` {#sec-implementation}
 
-In this section, we present the commands `qregfe` and `mmqreg` for the estimation of quantile regression models with fixed effects, which implement the methodologies described in the previous section.  
+While the estimation of the methods described above can be easily implemented using standard Stata commands, the process can be cumbersome and promp to errors. To address this, we introduce the Stata command `qregfe`. This command allows users to estimate quantile regression models with fixed effects using the CRE, Canay, and Modified Canay estimators, as well as the MMQR estimator.^[The MMQR estimator is also implemented by the `xtqreg` command, which was provide by the authors. There is also `mmqreg`, which was originally implemented as a stand alone command, but it is now integrated within this command.] The command is designed to be user-friendly, allowing for the estimation of quantile regression models with fixed effects in a single line of code, with only minor changes for model estimation.
 
-Both commands follow a similar syntax: 
+The commands uses the standard syntax: 
 
-```
-qregfe depvar indepvars, q(#) [options]
+```stata
+qregfe depvar [indepvars] [if] [in], q(#) [qmethod]
 ```
 
 # Conclusions {#sec:conclusions}
