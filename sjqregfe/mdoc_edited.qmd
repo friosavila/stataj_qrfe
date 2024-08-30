@@ -1,6 +1,6 @@
 ---
 title: "Estimation of Quantile Regressions with Multiple Fixed Effects"
-shorttitle: "Short toc Here"
+shorttitle: "QRegressions FE"
 author: 
     - name: Fernando Rios-Avila
       email: friosavi@levy.org
@@ -20,13 +20,13 @@ author:
 shortauthor: "Rios-Avila, Siles, Canavire-Bacarreza"
 aboutauthors: |
     Fernando Rios-Avila is a Research Scholar at the Levy Economics Institute of Bard College. 
-    
+    Leonardo Siles is a master student at the Universidad de Chile.
     Gustavo Canavire-Bacarreza is a Senior Economist at the World Bank.
 
 abstract: |
-    This is an example of StataJ article made by me
+    This paper introduces two new Stata commands, `qregfe` and `qregplot`, designed for estimating and visualizing quantile regression models with fixed effects. `qregfe` implements several methodologies including Correlated Random Effects, Canay (2011), a modified Canay estimator, and Method of Moments Quantile Regression (Machado and Santos Silva, 2019). This allows researchers to control for unobserved heterogeneity in panel data settings while examining heterogeneous effects across the conditional distribution. `qregplot` facilitates visualization of quantile regression results, enabling graphical examination of covariate effects across different quantiles. 
 
-keywords: Stata, LaTeX, Quarto, StataJ
+keywords: Quantile Regression, Fixed Effects, Panel Data
 format: 
     stjquarto-pdf: default
 keep-tex: true        
@@ -493,10 +493,6 @@ QR Coefficients for Experience
 :::
 
 # Conclusions {#sec:conclusions}
-
-To conclude this paper, I would draft the following:
-
-# Conclusion
 
 This paper has introduced two new Stata commands, `qregfe` and `qregplot`, designed to estimate and visualize quantile regression models with fixed effects. These commands address the growing need for tools that can handle unobserved heterogeneity in quantile regression frameworks, particularly in panel data settings.
 

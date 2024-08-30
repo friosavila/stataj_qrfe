@@ -120,7 +120,7 @@
 %% TITLE
 
  
-\title[Short toc Here]{Estimation of Quantile Regressions with Multiple
+\title[QRegressions FE]{Estimation of Quantile Regressions with Multiple
 Fixed Effects}
 
 
@@ -148,9 +148,19 @@ The World Bank\\Washington, DC\\
 
 \begin{abstract}
 
-This is an example of StataJ article made by me
+This paper introduces two new Stata commands, \texttt{qregfe} and
+\texttt{qregplot}, designed for estimating and visualizing quantile
+regression models with fixed effects. \texttt{qregfe} implements several
+methodologies including Correlated Random Effects, Canay (2011), a
+modified Canay estimator, and Method of Moments Quantile Regression
+(Machado and Santos Silva, 2019). This allows researchers to control for
+unobserved heterogeneity in panel data settings while examining
+heterogeneous effects across the conditional distribution.
+\texttt{qregplot} facilitates visualization of quantile regression
+results, enabling graphical examination of covariate effects across
+different quantiles.
 
-\keywords{\inserttag, Stata, LaTeX, Quarto, StataJ}
+\keywords{\inserttag, Quantile Regression, Fixed Effects, Panel Data}
 \end{abstract}
 
 \section{Introduction}\label{sec-intro}
@@ -1313,10 +1323,6 @@ results that are in between the other estimators.
 
 \section{Conclusions}\label{sec:conclusions}
 
-To conclude this paper, I would draft the following:
-
-\section{Conclusion}\label{conclusion}
-
 This paper has introduced two new Stata commands, \texttt{qregfe} and
 \texttt{qregplot}, designed to estimate and visualize quantile
 regression models with fixed effects. These commands address the growing
@@ -1358,9 +1364,9 @@ conclusions.
 \begin{aboutauthors}
 
 Fernando Rios-Avila is a Research Scholar at the Levy Economics
-Institute of Bard College.
-
-Gustavo Canavire-Bacarreza is a Senior Economist at the World Bank.
+Institute of Bard College. Leonardo Siles is a master student at the
+Universidad de Chile. Gustavo Canavire-Bacarreza is a Senior Economist
+at the World Bank.
 
 \end{aboutauthors}
 
