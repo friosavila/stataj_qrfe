@@ -85,7 +85,7 @@ $${#eq-qloss}
 
  Where $\rho_\tau(u)=u\big(\tau-I(u<0)\big)$ is the check function, and $I(\cdot)$ is the indicator function. In essence, quantile regressions are estimating the parameters locally around the $\tau$-th quantile, although other approaches are possible [^3]. 
 
- [^3]: @kaplan2017 for example uses a nonparametric approach that produces smooth set of beta coefficients. And @bottai2019, proposes methods for estimating parametric quantile regression models, impossing parametric restrictions on the quantile coefficients across the distribution.
+ [^3]: @kaplan2017 for example uses a nonparametric approach that produces smooth set of beta coefficients. And @bottai2019, proposes methods for estimating parametric quantile regression models, imposing parametric restrictions on the quantile coefficients across the distribution.
 
  Most commands for estimating quantile regression models focus on estimating the above loss function, using linear programming techniques, while others like @kaplan2017 (`sivqr`) and @chernozhukov2022 (`qrprocess`) use other optimization techniques. 
 
@@ -108,4 +108,4 @@ $${#eq-feqr}
 
  ## Correlated Random Effects: CRE {#sec-cre}
 
- The first approach we discuss is the use of Correlated Random Effects (CRE) models for the estimation of quantile regression models. The CRE model is an alternative methodology for the estimation of fixed effects models that was proposed by @mundlak1978 and later generalized by @chamberlain1982. In contrast with standard fixed effects, the approach allows users to control for time fixed covariates in addition to time-varying covariates. And, in contrast with the random effects model, it does not make the assumption that the unobserved effect is uncorrelated with the observed covariates. Interestingly, in the context of linear models, the CRE model is equivalent to the fixed effects model [@wooldridge2010].
+ The first approach we discuss is the use of Correlated Random Effects (CRE) models for the estimation of quantile regression models. The CRE model is an alternative methodology for the estimation of fixed effects models that was proposed by @mundlak1978 and generalized by @chamberlain1982. In contrast with standard fixed effects, the approach allows users to control for time fixed covariates in addition to time-varying covariates. And, in contrast with the random effects model, it does not make the assumption that the unobserved effect is uncorrelated with the observed covariates. Interestingly, in the context of linear models, the CRE model is equivalent to the fixed effects model [@wooldridge2010].

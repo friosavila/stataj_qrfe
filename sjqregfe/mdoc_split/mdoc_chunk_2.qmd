@@ -68,13 +68,13 @@ $$
 
  Which could be extended to any number of fixed effects. As before, this approach is valid if the residual $v^{U_{it}}_{it}$ from the time and individual fixed effects (or all fixed effects considered) are small enough compared to the variation driven by the latent rank variable $U_{it}$. 
 
- In terms of the standard errors, for the linear CRE model, it is suggested to use the random effects estimator, or clustering standard errors at the individual level. For the quantile regression model, clustering standard errors at the individual level is also suggested by @wooldridge2010, and some rutines already implement this feature. When multiple fixed effects are considered, it is suggested to use the bootstrap methods for the estimation of the standard errors. 
+ In terms of the standard errors, for the linear CRE model, it is suggested to use the random effects estimator, or clustering standard errors at the individual level. For the quantile regression model, clustering standard errors at the individual level is also suggested by @wooldridge2010, and some routines already implement this feature. When multiple fixed effects are considered, it is suggested to use the bootstrap methods for the estimation of the standard errors. 
 
  ## Canay (2011) Estimator {#sec-canay}
 
  The second approach under consideration is the estimator proposed by @canay2011. As mentioned before, this paper argues that the estimator proposed by @abrevaya2008, and thus the implementation described above, may not provide consistent estimates of the quantile regression coefficients, as long as there is a disturbance $v^{U_{it}}_i$ left after modeling @eq-cre_alpha. Instead, under the assumption that the unobserved effect is a pure location shift, they propose an alternative estimator can be used to consistently estimate the quantile regression coefficients. 
 
- Before presenting the estimator, it is convinient to review a second approach that has been used to understand quantile regression models: The location-scale model. Under this specification, consider the following data generating process: 
+ Before presenting the estimator, it is convenient to review a second approach that has been used to understand quantile regression models: The location-scale model. Under this specification, consider the following data generating process: 
 
  $$\begin{aligned}
 y_i &= \beta_0+\beta_1 x_i + \gamma_0(U_i) + \gamma_1(U_i) x_{i} \ \text{or}\\
@@ -82,9 +82,9 @@ y_i &= \beta_0+\beta_1 x_i + \mu_i
 \end{aligned}
 $${#eq-loc-scale}
 
- In this specification, we assume that $\beta_0$ and $\beta_1$ are the location parameters that capture how the whole distribution of $y_i$ is affected by $x_i$. In contrast, $\gamma_0(U_i)$ and $\gamma_1(U_i)$ are the scale parameters that capture the heterogenous effect of $x_i$ on $y_i$ that deviates from the location effect. When using a simple linear regression model, say via OLS, we could assume that the compound component $\gamma_0(U_i) + \gamma_1(U_i) x_{i}$ is fully captured by the error term $\mu_i$. 
+ In this specification, we assume that $\beta_0$ and $\beta_1$ are the location parameters that capture how the whole distribution of $y_i$ is affected by $x_i$. In contrast, $\gamma_0(U_i)$ and $\gamma_1(U_i)$ are the scale parameters that capture the heterogenous effect of $x_i$ on $y_i$ that deviates from the location effect. When using a simple linear regression model, estimated via OLS, we could assume that the compound component $\gamma_0(U_i) + \gamma_1(U_i) x_{i}$ is fully captured by the error term $\mu_i$. 
 
- This provides three insights. First, that OLS could be used to identify the location effect of $x_i$ on $y_i$, which we know as the average or conditional mean effect. Second, $\gamma_1(U_i)$ is different from zero, the model is heteroskedastic, and the quantile regression could be used to identify this type of unobserved heterogenity. Lastly, if a covariate has no scale effect, all quantile coefficients will be the same as the OLS coefficient. 
+ This provides three insights. First, that OLS could be used to identify the location effect of $x_i$ on $y_i$, which we know as the average or conditional mean effect. Second, if $\gamma_1(U_i)$ is different from zero, the model is heteroskedastic, and the quantile regression could be used to identify this type of unobserved heterogenity. Lastly, if a covariate has no scale effect, all quantile coefficients will be the same as the OLS coefficient, except for the constant. 
 
  Although of little use, this location-scale model can be easily estimated using a two-step approach. First, estimate the location effect of $x_i$ on $y_i$ using OLS: 
 

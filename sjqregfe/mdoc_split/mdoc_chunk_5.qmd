@@ -1,0 +1,3 @@
+To illustrate the use of the `qregfe` and `qregplot` commands, we use the `nlswork` dataset, which is part of the Stata distribution. This dataset contains information on the labor market experience of 
+
+# Conclusions {#sec:conclusions}

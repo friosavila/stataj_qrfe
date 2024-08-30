@@ -288,7 +288,7 @@ are estimating the parameters locally around the \(\tau\)-th quantile,
 although other approaches are possible \footnote{\citet{kaplan2017} for
   example uses a nonparametric approach that produces smooth set of beta
   coefficients. And \citet{bottai2019}, proposes methods for estimating
-  parametric quantile regression models, impossing parametric
+  parametric quantile regression models, imposing parametric
   restrictions on the quantile coefficients across the distribution.}.
 
 Most commands for estimating quantile regression models focus on
@@ -509,9 +509,9 @@ In terms of the standard errors, for the linear CRE model, it is
 suggested to use the random effects estimator, or clustering standard
 errors at the individual level. For the quantile regression model,
 clustering standard errors at the individual level is also suggested by
-\citet{wooldridge2010}, and some rutines already implement this feature.
-When multiple fixed effects are considered, it is suggested to use the
-bootstrap methods for the estimation of the standard errors.
+\citet{wooldridge2010}, and some routines already implement this
+feature. When multiple fixed effects are considered, it is suggested to
+use the bootstrap methods for the estimation of the standard errors.
 
 \subsection{Canay (2011) Estimator}\label{sec-canay}
 
@@ -525,7 +525,7 @@ Instead, under the assumption that the unobserved effect is a pure
 location shift, they propose an alternative estimator can be used to
 consistently estimate the quantile regression coefficients.
 
-Before presenting the estimator, it is convinient to review a second
+Before presenting the estimator, it is convenient to review a second
 approach that has been used to understand quantile regression models:
 The location-scale model. Under this specification, consider the
 following data generating process:
@@ -679,8 +679,8 @@ Where \(\alpha_i\) is the unobserved effect, \(\beta_\alpha\) is the
 location coefficient of the unobserved heterogeneity, and
 \(\gamma(U_{it})\) is a smooth function that varies across quantiles.
 For the identification of \(\alpha_i\), we start with the same approach
-as \citet{canay2011}, impossing the asumption that \(\beta_\alpha=1\).
-In other words, the first step from \citet{canay2011} is the same as the
+as \citet{canay2011}, imposing the asumption that \(\beta_\alpha=1\). In
+other words, the first step from \citet{canay2011} is the same as the
 first step presented before.
 
 The second step, however, suggest that rather than transforming the
@@ -699,7 +699,7 @@ The main advantage over \citet{canay2011} is that this estimator allows
 for the unobserved effect to have a different impact on the dependent
 variable across quantiles, which may be more realistic in many
 applications. However, it assumes the OLS estimator does allow for the
-consistent estimation of an unobserved effect that is comprarable across
+consistent estimation of an unobserved effect that is comparable across
 individuals, which may not always be the case.
 
 In terms of Standard errors, \citet{canay2011} provides some guidance
@@ -751,7 +751,7 @@ uniform distribution, and captures the rank of the individual among all
 individuals with the same characteristics.
 
 What is interesting about this specification is that it simplifies the
-identification of the quantile coefficients by impossing a strict
+identification of the quantile coefficients by imposing a strict
 parametric relationship across the quantile specific coefficients.
 Specifically, that the location and scale coefficients can be identified
 globally, requiring only the local identification of the distribution of
@@ -812,7 +812,7 @@ q_{\tau}(\hat \mu_i) &= q_0(\tau)
 
 It can be seen that because Steps 1 and 2 are estimated globally using
 OLS, they can easily be extended to multiple fixed effects, without
-mayor difficulties. One can simply assume, for example, that the fixed
+major difficulties. One can simply assume, for example, that the fixed
 effects are estimated using a dummy variable approach, and all the steps
 described above follow. \footnote{In \citet{riosavila2024}, additional
   steps are presented because of the use of partial-out covariates.
@@ -851,7 +851,7 @@ the MMQR assumptions may not be applicable in all cases.
 
 While the estimation of the methods described above can be easily
 implemented using standard Stata commands, the process can be cumbersome
-and promp to errors. To address this, we introduce the Stata command
+and prone to errors. To address this, we introduce the Stata command
 \texttt{qregfe}. This command allows users to estimate quantile
 regression models with fixed effects using the CRE, Canay, and Modified
 Canay estimators, as well as the MMQR estimator.\footnote{The MMQR
@@ -939,7 +939,8 @@ The main options for the command are:
   \end{itemize}
 \item
   \texttt{parallel}: request the estimation of bootstrap standard errors
-  to be performed using \texttt{parallel} package (\citet{vegayon2019})
+  to be performed using \texttt{parallel} package (\citet{vegayon2019}),
+  based on the specifications given in \texttt{bootstrap\_options}.
 
   \begin{itemize}
   \tightlist
@@ -951,16 +952,153 @@ The main options for the command are:
   \texttt{seed(\#)}: specifies the seed for the random number generator.
   The default is to use none.
 \item
-  \texttt{robust} and \texttt{cluster(varname)}: These options are
-  available when using \texttt{mmqreg} estimator. They follow the
-  derivations from \citet{riosavila2024}, based on robust and cluster
-  standard errors for gmm estimators..
-\item
   \texttt{other\_options}: Other options are also specific to the
   \texttt{qmethod()} used can also be passed to the command directly.
 \end{itemize}
 
-\section{}\label{section}
+\texttt{mmqreg} specific options are:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{robust} and \texttt{cluster(varname)}: These options are
+  available when using \texttt{mmqreg} estimator. They follow the
+  derivations from \citet{riosavila2024}, based on robust and cluster
+  standard errors for gmm estimators. The default are the GLS standard
+  errors.
+\item
+  \texttt{denopt()}: This option requests alternative options for the
+  estimator of the point density for the residual quantile. See
+  \texttt{help\ qreg}, specifically standard errors \texttt{vceopts}
+  section.
+\item
+  \texttt{dfadj}: Request to adjust the degrees of freedom for the
+  standard errors. The default is to use no adjustment.
+\item
+  \texttt{ls}: Request displaying the location and scale coefficients.
+  The default is not to display them.
+\end{itemize}
+
+\section{Visualization}\label{visualization}
+
+In addition to the introduction of the \texttt{qregfe} command, we also
+introduce the \texttt{qregplot} command. This command allows users to
+visualize the results of the quantile regression coefficents obtained
+using the \texttt{qregfe} command, as well as other quantile regression
+commands. It works similarly to the command \texttt{grqreg}
+\citep{grqreg}, but allows for the visualization of coefficients across
+many quantile regression estimators. The command uses the standard Stata
+syntax:
+
+\texttt{qregplot\ {[}indep\ varlist{]}\ ,\ \ quantiles(numlist)\ cons\ options}
+
+This command does not work independently. Instead it requires user to
+first estimate a quantile regression model using any of the standard
+quantile regression commands
+(\texttt{qreg,\ bsqreg,\ sqreg,\ qreg2,\ qrprocess}, \texttt{qregfe} ,
+etc). Then, calling on the \texttt{qregplot} command will identify the
+general syntax used by the previous command, and estimate the same model
+across the specified quantiles, storing the point estimates and
+confidence intervals, which are then used to plot the coefficients
+across the quantiles. The confidence intervals are estimated at the same
+level of confidence as the original model. The main options for the
+command are:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{indep\ varlist}: specifies the independent variables to be
+  plotted. The default is to plot all the independent variables
+  coefficients except for the constant. One should use the same names as
+  identified in the coefficients matrix.
+\item
+  \texttt{quantiles(numlist)}: is the list of quantiles to be plotted.
+  the default is \texttt{quantiles(10(5)90)}.
+\item
+  \texttt{cons}: request the plotting of the constant term. The default
+  is not to plot it.
+\item
+  \texttt{ols}: request estimating and plotting of the OLS coefficients
+  along the quantile regression coefficients. The default is not to plot
+  them. When requested, the OLS specification will follow the same
+  specification as the quantile regression model, but will not include
+  the absorbed fixed effects, unless specified using \texttt{olsopt()}
+\item
+  \texttt{olsopt()}: specifies the options to be used for the OLS
+  estimation. All options available for \texttt{regress} can be
+  specified here. If one request absorbing fixed effects, the command
+  will use \texttt{reghdfe} to estimate the OLS model.
+\item
+  \texttt{seed(\#)}: specifies the seed for the random number generator,
+  so the same seed is used across quantiles. The default is to use none.
+\item
+  \texttt{label}: Request using variable labels as titles for each
+  coefficient plot. The default is to use variable names.\\
+\item
+  \texttt{labelopt(options)}: Specifies options for labels. Two options
+  are available: \texttt{lines(\#L)} which requests breaking the labels
+  into \texttt{\#L} number of lines, default is 1;
+  \texttt{maxlength(\#K)} requests breaking a label into lines of a max
+  length \texttt{\#K}.
+\item
+  \texttt{mtitles(titles)}: Provides titles for each plot. If not enough
+  titles are provided, the command will use the variable names, or
+  variable labels.
+\end{itemize}
+
+Figure design options:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{raopt(rarea\ options)}: Specifies options to be used for
+  plotting the Confidence Intervals. The default options are
+  \texttt{pstyle(p1)\ fintenity(30)\ lwidth(none)}.
+\item
+  \texttt{lnopt(line\ options)}: Specifies options to be used for
+  plotting the line of point estimates. The default options are
+  \texttt{pstyle(p1)\ lwidth(0.3)}.
+\item
+  \texttt{twopt(twoway\ options)}: Specifies options to be used for the
+  two-way graph that combines the \texttt{rarea} and \texttt{line}
+  plots. The default option is to set graph and plot region margins to
+  \texttt{vsmall}.
+\item
+  \texttt{graph\_combine\ options}: One can specify any
+  \texttt{graph\ combine} options directly to the command. This will be
+  added on the last step that combines the graphs, and will not affect
+  the individual plots. However, if only one coefficient is plotted,
+  options that are specified directly will affect the two-way plot.
+\end{itemize}
+
+Storing, saving, and recyling options:
+
+Because the estimation of multiple quantile regression models can be
+time consuming, the \texttt{qregplot} command allows for the storing or
+saving the results for later use.
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{estore(name)}: Request storing the results into memory.
+  Similar to \texttt{estimates\ store}.
+\item
+  \texttt{esave(filename)}: Request saving the results into a
+  \texttt{ster} file. Similar to \texttt{estimates\ save}.
+\item
+  \texttt{from(name)}: Request using the stored results from memory to
+  plot the quantile coefficients. Similar to
+  \texttt{estimates\ restore}. If results were saved to a file, one
+  should first use \texttt{est\ use\ filename} to load the results into
+  memory, and then store them into memory with a name.
+\end{itemize}
+
+\section{Illustration}\label{illustration}
+
+To illustrate the use of the \texttt{qregfe} and \texttt{qregplot}
+commands, we use the \texttt{nlswork} dataset, which is part of the
+Stata distribution. This dataset contains information on the labor
+market experience of
 
 \clearpage
 

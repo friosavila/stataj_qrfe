@@ -84,7 +84,7 @@ $${#eq-qloss}
 
 Where $\rho_\tau(u)=u\big(\tau-I(u<0)\big)$ is the check function, and $I(\cdot)$ is the indicator function. In essence, quantile regressions are estimating the parameters locally around the $\tau$-th quantile, although other approaches are possible [^3].
 
-[^3]: @kaplan2017 for example uses a nonparametric approach that produces smooth set of beta coefficients. And @bottai2019, proposes methods for estimating parametric quantile regression models, impossing parametric restrictions on the quantile coefficients across the distribution.
+[^3]: @kaplan2017 for example uses a nonparametric approach that produces smooth set of beta coefficients. And @bottai2019, proposes methods for estimating parametric quantile regression models, imposing parametric restrictions on the quantile coefficients across the distribution.
 
 Most commands for estimating quantile regression models focus on estimating the above loss function, using linear programming techniques, while others like @kaplan2017 (`sivqr`) and @chernozhukov2022 (`qrprocess`) use other optimization techniques.
 
@@ -179,13 +179,13 @@ $$
 
 Which could be extended to any number of fixed effects. As before, this approach is valid if the residual $v^{U_{it}}_{it}$ from the time and individual fixed effects (or all fixed effects considered) are small enough compared to the variation driven by the latent rank variable $U_{it}$.
 
-In terms of the standard errors, for the linear CRE model, it is suggested to use the random effects estimator, or clustering standard errors at the individual level. For the quantile regression model, clustering standard errors at the individual level is also suggested by @wooldridge2010, and some rutines already implement this feature. When multiple fixed effects are considered, it is suggested to use the bootstrap methods for the estimation of the standard errors.
+In terms of the standard errors, for the linear CRE model, it is suggested to use the random effects estimator, or clustering standard errors at the individual level. For the quantile regression model, clustering standard errors at the individual level is also suggested by @wooldridge2010, and some routines already implement this feature. When multiple fixed effects are considered, it is suggested to use the bootstrap methods for the estimation of the standard errors.
 
 ## Canay (2011) Estimator {#sec-canay}
 
 The second approach under consideration is the estimator proposed by @canay2011. As mentioned before, this paper argues that the estimator proposed by @abrevaya2008, and thus the implementation described above, may not provide consistent estimates of the quantile regression coefficients, as long as there is a disturbance $v^{U_{it}}_i$ left after modeling @eq-cre_alpha. Instead, under the assumption that the unobserved effect is a pure location shift, they propose an alternative estimator can be used to consistently estimate the quantile regression coefficients.
 
-Before presenting the estimator, it is convinient to review a second approach that has been used to understand quantile regression models: The location-scale model. Under this specification, consider the following data generating process:
+Before presenting the estimator, it is convenient to review a second approach that has been used to understand quantile regression models: The location-scale model. Under this specification, consider the following data generating process:
 
 $$\begin{aligned}
 y_i &= \beta_0+\beta_1 x_i + \gamma_0(U_i) + \gamma_1(U_i) x_{i} \ \text{or}\\
@@ -255,14 +255,14 @@ $$y_{it} =\beta_0 +   x_{it}'\beta + \beta_\alpha \alpha_i+
 \gamma_0(U_{it}) +  x_{it}'\gamma(U_{it}) + \gamma_\alpha(U_{it}) \alpha_i
 $${#eq-mcanay-dgp}
 
-Where $\alpha_i$ is the unobserved effect, $\beta_\alpha$ is the location coefficient of the unobserved heterogeneity, and $\gamma(U_{it})$ is a smooth function that varies across quantiles. For the identification of $\alpha_i$, we start with the same approach as @canay2011, impossing the asumption that $\beta_\alpha=1$. In other words, the first step from @canay2011 is the same as the first step presented before.
+Where $\alpha_i$ is the unobserved effect, $\beta_\alpha$ is the location coefficient of the unobserved heterogeneity, and $\gamma(U_{it})$ is a smooth function that varies across quantiles. For the identification of $\alpha_i$, we start with the same approach as @canay2011, imposing the asumption that $\beta_\alpha=1$. In other words, the first step from @canay2011 is the same as the first step presented before.
 
 The second step, however, suggest that rather than transforming the dependent variable using the predicted fixed effects, we should estimate the quantile regression model using the predicted unobserved effects as an additional explanatory variable. This can be done by estimating the following model:
 
 $$q_{\tau}(y_{it}|x_{it},\hat \alpha_i) =  x_{it}\beta(\tau)+\beta(\tau) \hat\alpha_i
 $$
 
-As before, this model can be extended to multiple fixed effects, by simply estimating the unobserved effects using OLS, and then estimating the quantile regression model using the predicted unobserved effects. The main advantage over @canay2011 is that this estimator allows for the unobserved effect to have a different impact on the dependent variable across quantiles, which may be more realistic in many applications. However, it assumes the OLS estimator does allow for the consistent estimation of an unobserved effect that is comprarable across individuals, which may not always be the case.
+As before, this model can be extended to multiple fixed effects, by simply estimating the unobserved effects using OLS, and then estimating the quantile regression model using the predicted unobserved effects. The main advantage over @canay2011 is that this estimator allows for the unobserved effect to have a different impact on the dependent variable across quantiles, which may be more realistic in many applications. However, it assumes the OLS estimator does allow for the consistent estimation of an unobserved effect that is comparable across individuals, which may not always be the case.
 
 In terms of Standard errors, @canay2011 provides some guidance for the derivation of analytical standard errors for their estimator. Recently, however, @besstremyannaya2019 has shown that the analytical standard errors derivations are incorrect. Instead, based on their recommendations, we suggest that the bootstrap method should be used for the estimation of the standard errors for both the Canay and Modified Canay estimators.
 
@@ -280,7 +280,7 @@ $${#eq-dgp_mmqreg}
 
 This specification assumes that $\mu_i$ is an identically and independently distributed random variable with any arbitrary distribution. $\delta_0 + X_{i}' \delta$ denotes the multiplicative scale component (heteroskedasticty generating component), and $\beta_0 + x_{i}' \beta$ denotes the location coefficients. The second line in @eq-dgp_mmqreg, represents the same model, but using the inverse of the distribution function of $U_i$ as the mediating factor. As before, $U_i$ is a random variable that follows a uniform distribution, and captures the rank of the individual among all individuals with the same characteristics.
 
-What is interesting about this specification is that it simplifies the identification of the quantile coefficients by impossing a strict parametric relationship across the quantile specific coefficients. Specifically, that the location and scale coefficients can be identified globally, requiring only the local identification of the distribution of $\mu_i$ being necessary to identify all quantile coefficients.
+What is interesting about this specification is that it simplifies the identification of the quantile coefficients by imposing a strict parametric relationship across the quantile specific coefficients. Specifically, that the location and scale coefficients can be identified globally, requiring only the local identification of the distribution of $\mu_i$ being necessary to identify all quantile coefficients.
 
 For this simple case, the MMQREG estimator can be decribed as follows:[^9]
 
@@ -307,7 +307,7 @@ $$
 $$\beta_{\tau} = \beta + q_0(\tau) \delta
 $$
 
-It can be seen that because Steps 1 and 2 are estimated globally using OLS, they can easily be extended to multiple fixed effects, without mayor difficulties. One can simply assume, for example, that the fixed effects are estimated using a dummy variable approach, and all the steps described above follow. [^10] The derivation of standard errors follows from the use of the method of moments approach, and the identification of the empirical influence functions, based on the following moment conditions:
+It can be seen that because Steps 1 and 2 are estimated globally using OLS, they can easily be extended to multiple fixed effects, without major difficulties. One can simply assume, for example, that the fixed effects are estimated using a dummy variable approach, and all the steps described above follow. [^10] The derivation of standard errors follows from the use of the method of moments approach, and the identification of the empirical influence functions, based on the following moment conditions:
 
 $$\begin{aligned}
 E[y_{i} - \beta_0 - x_{i}' \beta] &= 0 \\
@@ -322,7 +322,7 @@ Despite the flexibility of this approach, it is important to note that the MMQR 
 
 # Implementation: `qregfe` {#sec-implementation}
 
-While the estimation of the methods described above can be easily implemented using standard Stata commands, the process can be cumbersome and promp to errors. To address this, we introduce the Stata command `qregfe`. This command allows users to estimate quantile regression models with fixed effects using the CRE, Canay, and Modified Canay estimators, as well as the MMQR estimator.^[The MMQR estimator is also implemented by the `xtqreg` command, which was provide by the authors. There is also `mmqreg`, which was originally implemented as a stand alone command, but it is now integrated within this command.] The command is designed to be user-friendly, allowing for the estimation of quantile regression models with fixed effects in a single line of code, with only minor changes for model estimation.
+While the estimation of the methods described above can be easily implemented using standard Stata commands, the process can be cumbersome and prone to errors. To address this, we introduce the Stata command `qregfe`. This command allows users to estimate quantile regression models with fixed effects using the CRE, Canay, and Modified Canay estimators, as well as the MMQR estimator.^[The MMQR estimator is also implemented by the `xtqreg` command, which was provide by the authors. There is also `mmqreg`, which was originally implemented as a stand alone command, but it is now integrated within this command.] The command is designed to be user-friendly, allowing for the estimation of quantile regression models with fixed effects in a single line of code, with only minor changes for model estimation.
 
 The command uses the standard Stata syntax: 
 
@@ -347,12 +347,55 @@ The main options for the command are:
 -  `boot[(bootstrap_options)]`: request bootstrap standard errors to be computed.
    -  if not specified, standard errors correspond to the default from `qmethod()`, except for `mmqreg`, which uses the gls standard errors, as proposed by @mss2019 and @riosavila2024.
    -  `bootstrap options` are the standard options for the `bootstrap` in Stata, using the same results. 
-- `parallel`: request the estimation of bootstrap standard errors to be performed using `parallel` package (@vegayon2019)
+- `parallel`: request the estimation of bootstrap standard errors to be performed using `parallel` package (@vegayon2019), based on the specifications given in `bootstrap_options`.
   - `parallel_cluster(#)` specifies the number of clusters to be used for the parallelization. The default is 2.
 - `seed(#)`: specifies the seed for the random number generator. The default is to use none.
-- `robust` and `cluster(varname)`: These options are available when using `mmqreg` estimator. They follow the derivations from  @riosavila2024, based on robust and cluster standard errors for gmm estimators..
 - `other_options`: Other options are also specific to the `qmethod()` used can also be passed to the command directly.
-  
-# 
+
+`mmqreg` specific options are:
+
+- `robust` and `cluster(varname)`: These options are available when using `mmqreg` estimator. They follow the derivations from  @riosavila2024, based on robust and cluster standard errors for gmm estimators. The default are the GLS standard errors.
+- `denopt()`: This option requests alternative options for the estimator of the point density for the residual quantile. See `help qreg`, specifically standard errors `vceopts` section.
+- `dfadj`: Request to adjust the degrees of freedom for the standard errors. The default is to use no adjustment.
+- `ls`: Request displaying the location and scale coefficients. The default is not to display them.
+    
+# Visualization
+
+In addition to the introduction of the `qregfe` command, we also introduce the `qregplot` command. This command allows users to visualize the results of the quantile regression coefficents obtained using the `qregfe` command, as well as other quantile regression commands. It works similarly to the command `grqreg` [@grqreg], but allows for the visualization of coefficients across many quantile regression estimators. The command uses the standard Stata syntax:
+
+`qregplot [indep varlist] ,  quantiles(numlist) cons options`
+
+This command does not work independently. Instead it requires user to first estimate a quantile regression model using any of the standard quantile regression commands (`qreg, bsqreg, sqreg, qreg2, qrprocess`, `qregfe` , etc). Then, calling on the `qregplot` command will identify the general syntax used by the previous command, and estimate the same model across the specified quantiles, storing the point estimates and confidence intervals, which are then used to plot the coefficients across the quantiles. The confidence intervals are estimated at the same level of confidence as the original model. The main options for the command are:
+
+- `indep varlist`: specifies the independent variables to be plotted. The default is to plot all the independent variables coefficients except for the constant. One should use the same names as identified in the coefficients matrix.
+- `quantiles(numlist)`: is the list of quantiles to be plotted. the default is `quantiles(10(5)90)`. 
+- `cons`: request the plotting of the constant term. The default is not to plot it.
+- `ols`: request estimating and plotting of the OLS coefficients along the quantile regression coefficients. The default is not to plot them. When requested, the OLS specification will follow the same specification as the quantile regression model, but will not include the absorbed fixed effects, unless specified using `olsopt()`
+- `olsopt()`: specifies the options to be used for the OLS estimation. All options available for `regress` can be specified here. If one request absorbing fixed effects, the command will use `reghdfe` to estimate the OLS model.
+- `seed(#)`: specifies the seed for the random number generator, so the same seed is used across quantiles. The default is to use none.
+- `label`: Request using variable labels as titles for each coefficient plot. The default is to use variable names.  
+- `labelopt(options)`: Specifies options for labels. Two options are available: `lines(#L)` which requests breaking the labels into `#L` number of lines, default is 1; `maxlength(#K)` requests breaking a label into lines of a max length `#K`. 
+- `mtitles(titles)`: Provides titles for each plot. If not enough titles are provided, the command will use the variable names, or variable labels.
+ 
+Figure design options:
+
+- `raopt(rarea options)`: Specifies options to be used for plotting the Confidence Intervals. The default options are `pstyle(p1) fintenity(30) lwidth(none)`.
+- `lnopt(line options)`: Specifies options to be used for plotting the line of point estimates. The default options are `pstyle(p1) lwidth(0.3)`.
+- `twopt(twoway options)`: Specifies options to be used for the two-way graph that combines the `rarea` and `line` plots. The default option is to set graph and plot region margins to `vsmall`.
+- `graph_combine options`: One can specify any `graph combine` options directly to the command. This will be added on the last step that combines the graphs, and will not affect the individual plots.
+  However, if only one coefficient is plotted, options that are specified directly will affect the two-way plot. 
+
+Storing, saving, and recyling options:
+
+Because the estimation of multiple quantile regression models can be time consuming, the `qregplot` command allows for the storing or saving the results for later use. 
+
+- `estore(name)`: Request storing the results into memory. Similar to `estimates store`.
+- `esave(filename)`: Request saving the results into a `ster` file. Similar to `estimates save`.
+- `from(name)`: Request using the stored results from memory to plot the quantile coefficients. Similar to `estimates restore`. If results were saved to a file, one should first use `est use filename` to load the results into memory, and then store them into memory with a name.
+
+# Illustration
+
+To illustrate the use of the `qregfe` and `qregplot` commands, we use the `nlswork` dataset, which is part of the Stata distribution. This dataset contains information on the labor market experience of 
+
 # Conclusions {#sec:conclusions}
 

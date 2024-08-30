@@ -37,7 +37,8 @@ syntax varlist(fv ts) [if] [in] [pw], ABSorb(varlist)    /// variables to absorb
 	ereturn local depvar "`yvar'"
     ereturn local quantile `quantile'
     ereturn local absorb "`absorb'"
-    ereturn local wcmd "qregfe"
+    ereturn local cmd "qregfe"
+    ereturn local wcmd `qmethod'
     ereturn local cmdline qregfe `0'
     ereturn local method "CRE"
     ereturn local qmethod "`qmethod'"
@@ -70,9 +71,11 @@ end
 program display_results
     syntax [anything(everything)], [*]
     display_parser, `options'
-    if "`e(wcmd)'"=="qregfe" {
+    if "`e(cmd)'"=="qregfe" {
         display "Quantile Regression with Fixed Effects"
+        adde local cmd `e(wcmd)'
         `e(cmd)', `display_opt'
+        adde local cmd qregfe
         display "Dependent Variable: `e(depvar)'"
         display "Quantile(s): `e(quantile)'"
         display "Fixed Effects: `e(absorb)'"
@@ -248,3 +251,6 @@ program myhdmean, rclass
 	
 end
 
+program adde, eclass
+    ereturn `0'
+end

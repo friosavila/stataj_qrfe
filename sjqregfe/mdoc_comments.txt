@@ -1,26 +1,33 @@
 Explanations for mdoc_proofread_1.qmd:
 1. Corrected minor spelling and grammatical errors throughout the text.
-2. Adjusted punctuation and sentence structure for improved clarity and readability.
-3. Ensured consistent use of hyphens in compound adjectives (e.g., "time-fixed" instead of "time fixed").
-4. Made minor adjustments to word choice for better flow and precision (e.g., "leverages" instead of "leverage on").
+2. Adjusted punctuation in several instances for improved clarity and readability.
+3. Fixed inconsistencies in hyphenation (e.g., "time-fixed" instead of "time fixed").
+4. Improved sentence structure in a few places for better flow and comprehension.
 
 Explanations for mdoc_proofread_2.qmd:
-1. Corrected spelling errors: "ommited" to "omitted", "convinient" to "convenient", "excersise" to "exercise", "rutines" to "routines".
-2. Fixed grammatical issues: "specially" to "especially", "few other benefits" to "a few other benefits", "can be easily use" to "can be easily used".
-3. Improved clarity and sentence structure in several places, such as "In fact the more dominant becomes $v^{U_{it}}_i$" to "In fact, the more dominant $v^{U_{it}}_i$ becomes".
-4. Adjusted punctuation where necessary, including adding commas for better readability.
-5. Corrected "heterogenous" to "heterogeneous".
+1. Corrected spelling errors: "ommited" to "omitted", "indivual" to "individual", "excersise" to "exercise", "heterogenous" to "heterogeneous".
+2. Fixed grammatical issues: "can be easily use" to "can be easily used", "lets reconsider" to "let\'s reconsider".
+3. Improved clarity and sentence structure in several places, such as "This, however, has some limitations" and "This provides three insights".
+4. Adjusted punctuation where necessary, including adding commas for clarity and correcting hyphenation.
+5. Maintained all equations, code blocks, and Quarto Markdown formatting as per instructions.
 
 Explanations for mdoc_proofread_3.qmd:
-1. Corrected "an" to "can" in the sentence "because $\\alpha_i$ can now be estimated globally".
-2. Changed "impossing" to "imposing" in multiple instances.
-3. Added "we" in the sentence "As before, if we assume that $\\alpha_i$ and $\\alpha_t$ are constant across quantiles".
-4. Changed "characeristic" to "characteristic".
-5. Changed "mayor" to "major" in the sentence "without major difficulties".
-6. Fixed various minor punctuation and spacing issues throughout the text.
+1. Corrected "an" to "can" in the sentence: "because $\\alpha_i$ can now be estimated globally"
+2. Changed "characeristic" to "characteristic" in the Modified Canay(2011) Estimator section
+3. Corrected "asumption" to "assumption" in the Modified Canay(2011) Estimator section
+4. Changed "Standard errors" to "standard errors" for consistency
+5. Corrected "lets" to "let\'s" in the Method of Moments Quantile Regression section
+6. Changed "heterogenous" to "heterogeneous" in the Method of Moments Quantile Regression section
+7. Corrected "heteroskedasticty" to "heteroskedasticity" in the Method of Moments Quantile Regression section
+8. Added "the" before "$\\tau$th" for better readability
 
 Explanations for mdoc_proofread_4.qmd:
-1. Changed "few advantages" to "a few advantages" for grammatical correctness.
-2. Corrected "heterogenous" to "heterogeneous" for proper spelling.
-3. Added a comma after "In this section" for better sentence structure.
+1. Corrected spelling errors (e.g., "possitive" to "positive", "heterogenous" to "heterogeneous").
+2. Fixed grammatical issues (e.g., "provide few advantages" to "provide a few advantages", "This is the only estimator also has its on command" to "This is the only estimator that also has its own command").
+3. Improved punctuation and sentence structure for clarity.
+4. Corrected minor typos and inconsistencies (e.g., "canay" to "Canay", "gls" to "GLS").
+5. Adjusted some phrasing for better readability and consistency.
+
+Explanations for mdoc_proofread_5.qmd:
+1. No major changes were required.
 

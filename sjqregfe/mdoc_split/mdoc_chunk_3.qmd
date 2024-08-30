@@ -22,7 +22,7 @@ $$
  $$y_{it} = \beta_0(U_{it}) + x_{it}'\beta(U_{it}) + \alpha_i + \alpha_t
 $${#eq-canay-dgp-2way}
 
- As before if we assume that $\alpha_i$ and $\alpha_t$ are constant across quantiles, could use the same two-step approach to estimate the quantile regression coefficients. First, estimate the location effects using OLS, and then estimate the quantile regression model using the predicted fixed effects. 
+ As before, if we assume that $\alpha_i$ and $\alpha_t$ are constant across quantiles, we could use the same two-step approach to estimate the quantile regression coefficients. First, estimate the location effects using OLS, and then estimate the quantile regression model using the transformed dependent variable, after absorbing the predicted fixed effects. 
 
  $$q_{\tau}(y_{it}-\hat \alpha_i - \hat \alpha_t|x_{it})=q_{\tau}(\tilde y_{it}|x_{it}) = x_{it}\beta(\tau)
 $${#eq-canay-mway}
@@ -39,16 +39,16 @@ $${#eq-canay-mway}
 \gamma_0(U_{it}) +  x_{it}'\gamma(U_{it}) + \gamma_\alpha(U_{it}) \alpha_i
 $${#eq-mcanay-dgp}
 
- Where $\alpha_i$ is the unobserved effect, $\beta_\alpha$ is the location coefficient of the unobserved heterogeneity, and $\gamma(U_{it})$ is a smooth function that varies across quantiles. For the identification of $\alpha_i$, we start with the same approach as @canay2011, impossing the asumption that $\beta_\alpha=1$. In other words, the first step from @canay2011 is the same as the first step presented before. 
+ Where $\alpha_i$ is the unobserved effect, $\beta_\alpha$ is the location coefficient of the unobserved heterogeneity, and $\gamma(U_{it})$ is a smooth function that varies across quantiles. For the identification of $\alpha_i$, we start with the same approach as @canay2011, imposing the asumption that $\beta_\alpha=1$. In other words, the first step from @canay2011 is the same as the first step presented before. 
 
  The second step, however, suggest that rather than transforming the dependent variable using the predicted fixed effects, we should estimate the quantile regression model using the predicted unobserved effects as an additional explanatory variable. This can be done by estimating the following model: 
 
  $$q_{\tau}(y_{it}|x_{it},\hat \alpha_i) =  x_{it}\beta(\tau)+\beta(\tau) \hat\alpha_i
 $$
 
- As before, this model can be extended to multiple fixed effects, by simply estimating the unobserved effects using OLS, and then estimating the quantile regression model using the predicted unobserved effects. The main advantage over @canay2011 is that this estimator allows for the unobserved effect to have a different impact on the dependent variable across quantiles, which may be more realistic in many applications. However, it assumes the OLS estimator does allow for the consistent estimation of an unobserved effect that is comprarable across individuals, which may not always be the case. 
+ As before, this model can be extended to multiple fixed effects, by simply estimating the unobserved effects using OLS, and then estimating the quantile regression model using the predicted unobserved effects. The main advantage over @canay2011 is that this estimator allows for the unobserved effect to have a different impact on the dependent variable across quantiles, which may be more realistic in many applications. However, it assumes the OLS estimator does allow for the consistent estimation of an unobserved effect that is comparable across individuals, which may not always be the case. 
 
- In terms of Standard errors, @canay2011 provides some guidance for the derivation of analytical standard errors for their estimator. Recently, however, @besstremyannaya2019 has shown that the standard errors derivations are incorrect. Instead, based on their recommendations, we suggest that the bootstrap method should be used for the estimation of the standard errors for both the Canay and Modified Canay estimators. 
+ In terms of Standard errors, @canay2011 provides some guidance for the derivation of analytical standard errors for their estimator. Recently, however, @besstremyannaya2019 has shown that the analytical standard errors derivations are incorrect. Instead, based on their recommendations, we suggest that the bootstrap method should be used for the estimation of the standard errors for both the Canay and Modified Canay estimators. 
 
  ## Method of Moments Quantile Regression @mss2019 {#sec-mmqr}
 
@@ -62,9 +62,9 @@ Y_{i} &= \beta_0 + x_{i}' \beta + (\delta_0 + X_{i}' \delta)*F^{-1}(U_i)) \text{
 \end{aligned}
 $${#eq-dgp_mmqreg}
 
- This specification assumes that $\mu_i$ is an identically and independently distributed random variable with any arbitray distribution. $\delta_0 + X_{i}' \delta$ denotes the multiplative scale component (heteroskedasiticty generating component), and $\beta_0 + x_{i}' \beta$ denotes the location coefficients. The second line in @eq-dgp_mmqreg, represents the same model, but using the inverse of the distribution function of $U_i$ as the mediating factor. As before, $U_i$ is a random variable that follows a uniform distribution, and captures the rank of the individual among all individuals with the same characteristics. 
+ This specification assumes that $\mu_i$ is an identically and independently distributed random variable with any arbitrary distribution. $\delta_0 + X_{i}' \delta$ denotes the multiplicative scale component (heteroskedasticty generating component), and $\beta_0 + x_{i}' \beta$ denotes the location coefficients. The second line in @eq-dgp_mmqreg, represents the same model, but using the inverse of the distribution function of $U_i$ as the mediating factor. As before, $U_i$ is a random variable that follows a uniform distribution, and captures the rank of the individual among all individuals with the same characteristics. 
 
- What is interesting about this specification is that it simplifies the identification of the quantile coefficients further, by impossing a strict parametric relationship across the scale coefficients. Specifically, that they are directly related to the values of $\mu_i$ or $F^{-1}(U_i)$. Thus, the location and scale coefficients can be identified globally, requiring only the local identification of the distribution of $\mu_i$. 
+ What is interesting about this specification is that it simplifies the identification of the quantile coefficients by imposing a strict parametric relationship across the quantile specific coefficients. Specifically, that the location and scale coefficients can be identified globally, requiring only the local identification of the distribution of $\mu_i$ being necessary to identify all quantile coefficients. 
 
  For this simple case, the MMQREG estimator can be decribed as follows:[^9] 
 
@@ -91,8 +91,13 @@ $$
  $$\beta_{\tau} = \beta + q_0(\tau) \delta
 $$
 
- It can be seen that because Steps 1 and 2 are estimated globally using OLS, they can easily be extended to multiple fixed effects, without mayor difficulties. One can simply assume, for example, that the fixed effects are estimated using a dummy variable approach, and all the steps described above follow. [^10] The derivation of standard errors follows from the use of the method of moments approach, and the identification of the empirical influence functions. 
+ It can be seen that because Steps 1 and 2 are estimated globally using OLS, they can easily be extended to multiple fixed effects, without major difficulties. One can simply assume, for example, that the fixed effects are estimated using a dummy variable approach, and all the steps described above follow. [^10] The derivation of standard errors follows from the use of the method of moments approach, and the identification of the empirical influence functions, based on the following moment conditions: 
+
+ $$\begin{aligned}
+E[y_{i} - \beta_0 - x_{i}' \beta] &= 0 \\
+E[|y_{i} - \beta_0 - x_{i}' \beta|- \delta_0 + x_{i}' \delta] &= 0 \\
+E\left[ I\left(\frac{y_{i} - \beta_0 - x_{i}' \beta}{\delta_0 + x_{i}' \delta} < q_0(\tau)\right) \right] &= \tau
+\end{aligned}
+$${#eq-mmqreg-moments}
 
  [^10]: In @riosavila2024, additional steps are presented because of the use of partial-out covariates. However, the same results can be obtained using the simpler approach described here.
-
- Despite the flexibility of this approach, it is important to note that the MMQR estimator is based on the assumption that all quantile coefficients are constructed as a simple combination of the location and scale coefficients. They only differ in the value of the mediating factor, the unconditional quantile of the standardized residual. This may be a strong assumption, and may not be applicable in all cases.

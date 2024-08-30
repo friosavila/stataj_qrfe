@@ -74,12 +74,12 @@ program define qregfe , eclass
                 if "`boot'`boot1'"!="" & "`parallel'"=="" {
                     ** Simple Bootstrap
                     capture : bootstrap, `boot1': _qregfe_canay `0'    
-                    syntax varlist(fv ts) [if] [in] ,  [*] [Quantile(numlist)] ABSorb(varlist)
+                    syntax varlist(fv ts) [if] [in] ,  [*] Quantile(numlist) ABSorb(varlist)
                         gettoken yvar aux: varlist
                     	ereturn local depvar "`yvar'"
                         ereturn local quantile `quantile'
                         ereturn local absorb "`absorb'"
-                        ereturn local wcmd "qregfe"
+                        ereturn local cmd "qregfe"
                         ereturn local cmdline qregfe `0'
                     if _rc==0 display_results    
                 }
@@ -88,12 +88,12 @@ program define qregfe , eclass
                     parallel initialize `parallel_cluster'
                     capture : parallel bs, `boot1': _qregfe_canay `0' 
                     ** Recover for display
-                    syntax varlist(fv ts) [if] [in] ,  [*] [Quantile(numlist)] ABSorb(varlist)
+                    syntax varlist(fv ts) [if] [in] ,  [*] Quantile(numlist) ABSorb(varlist)
                         gettoken yvar aux: varlist
                     	ereturn local depvar "`yvar'"
                         ereturn local quantile `quantile'
                         ereturn local absorb "`absorb'"
-                        ereturn local wcmd "qregfe"
+                        ereturn local cmd "qregfe"
                         ereturn local cmdline qregfe `0'
                     
                     if _rc==0 display_results
@@ -108,12 +108,12 @@ program define qregfe , eclass
                 if "`boot'`boot1'"!="" & "`parallel'"=="" {
                     ** Simple Bootstrap
                     qui: bootstrap, `boot1': _qregfe_cre `0'    
-                    syntax varlist(fv ts) [if] [in] ,  [*] [Quantile(numlist)] ABSorb(varlist)
+                    syntax varlist(fv ts) [if] [in] ,  [*] Quantile(numlist) ABSorb(varlist)
                         gettoken yvar aux: varlist
                     	ereturn local depvar "`yvar'"
                         ereturn local quantile `quantile'
                         ereturn local absorb "`absorb'"
-                        ereturn local wcmd "qregfe"
+                        ereturn local cmd "qregfe"
                         ereturn local cmdline qregfe `0'
                     if _rc==0 display_results    
                 }
@@ -122,12 +122,12 @@ program define qregfe , eclass
                     parallel initialize `parallel_cluster'
                     qui: parallel bs, `boot1': _qregfe_cre `0' 
                     ** Recover for display
-                    syntax varlist(fv ts) [if] [in] ,  [*] [Quantile(numlist)] ABSorb(varlist)
+                    syntax varlist(fv ts) [if] [in] ,  [*] Quantile(numlist) ABSorb(varlist)
                         gettoken yvar aux: varlist
                     	ereturn local depvar "`yvar'"
                         ereturn local quantile `quantile'
                         ereturn local absorb "`absorb'"
-                        ereturn local wcmd "qregfe"
+                        ereturn local cmd "qregfe"
                         ereturn local cmdline qregfe `0'
                     
                     if _rc==0 display_results
@@ -139,7 +139,8 @@ program define qregfe , eclass
         }
         else if "`mmqreg'"!="" {
                     mmqreg `0'
-                    ereturn local wcmd "qregfe"
+                    ereturn local cmd "qregfe"
+                    ereturn local wcmd "mmqreg"
                     ereturn local cmdline qregfe `0'
         }            
         else {

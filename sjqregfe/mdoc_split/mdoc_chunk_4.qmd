@@ -1,13 +1,76 @@
-However, it does provide few advantages over the other approaches. First, as suggested by @mss2019, with a sufficiently flexible specification of the scale component, the MMQR estimator can capture most of the important features related to the heterogenous effect of the covariates on the dependent variable. Second, because of the identification assumptions, this estimator avoids the problem of quantile crossing, which is common in other quantile regression models. Nevertheless, it is important to note that the MMQR estimator may not be applicable in all cases. 
+Despite the flexibility of this approach, it is important to note that the MMQR estimator is based on the assumption that all quantile coefficients are constructed as a simple combination of the location and scale coefficients. They only differ in the value of the mediating factor, the unconditional quantile of the standardized residual. This may be a strong assumption, and may not be applicable in all cases. However, it does provide few advantages over the other approaches. First, as suggested by @mss2019, with a sufficiently flexible specification of the scale component, the MMQR estimator can capture most of the important features related to the heterogenous effect of the covariates on the dependent variable. Second, because of the identification assumptions, this estimator avoids the problem of quantile crossing^[This requires that the linear model used to model heteroskedasticity ($X\delta$) produces a strictly possitive value, at least within the sample range.], which is common in other quantile regression models. Nevertheless, it is important to note that the MMQR assumptions may not be applicable in all cases. 
 
- # Implementation: `qregfe` and `mmqreg` {#sec-implementation}
+ # Implementation: `qregfe` {#sec-implementation}
 
- In this section we present the commands `qregfe` and `mmqreg` for the estimation of quantile regression models with fixed effects, which implement the methodologies described in the previous section.  
+ While the estimation of the methods described above can be easily implemented using standard Stata commands, the process can be cumbersome and prone to errors. To address this, we introduce the Stata command `qregfe`. This command allows users to estimate quantile regression models with fixed effects using the CRE, Canay, and Modified Canay estimators, as well as the MMQR estimator.^[The MMQR estimator is also implemented by the `xtqreg` command, which was provide by the authors. There is also `mmqreg`, which was originally implemented as a stand alone command, but it is now integrated within this command.] The command is designed to be user-friendly, allowing for the estimation of quantile regression models with fixed effects in a single line of code, with only minor changes for model estimation. 
 
- Both commands follow a similar syntax: 
+ The command uses the standard Stata syntax:  
 
- ```
-qregfe depvar indepvars, q(#) [options]
+ ``` 
+qregfe depvar [indepvars] [if] [in] [pw], quantile(#) [options]
 ```
 
-# Conclusions {#sec:conclusions}
+Where `depvar` is the dependent variable, `indepvars` are the independent variables, `if` and `in` are the standard Stata options. Because most of the estimators require the use of bootstrapping, canay and cre estimators do not allow for the use of weights. Only @mss estimator allows for it.
+
+The main options for the command are:
+
+- Fixed effect estimator:
+  - `cre`: Correlated Random Effects estimator
+  - `canay`: @canay2011 estimator
+  - `canay(modified)`: Modified @canay2011 estimator
+  - `mmqreg`: @mss2019 estimator. This is the only estimator also has its on command `mmqreg`.
+- `qmethod(,qmethod_options)`: Specifies the method used to estimate the quantile regression component. The default is `qreg`, but any other quantile regression command can be used. This will affect how `quantile(#)` is specified.
+  - If necessary, one can also request `qmethod_options` that are specific to the quantile regression command used.
+-  `q(#)`: specifies the specific quantile for which coefficients will be obtained. The default is the median `q(50)`. The values this could take depend on the `qmethod()` used. For example, if using `qmethod(sqreg)`, one could specify `q(10 25 90)` to obtain the 10th, 25th, and 90th quantiles. However, if one uses `qmethod(qrprocess)` ^[`qrprocess` is a user-written command that uses a different algorithm for the estimation of quantile regression models.], one could specify `q(0.1 0.25 0.9)` to obtain the same quantiles. 
+  If using `mmqreg`, multiple quantiles are always allowed.
+-  `abs(varlist)`: specifies the variables that would be used to absorb the fixed effects. This is necessary for CRE and Canay estimators. For the `mmqreg` estimator, this is not necessary, as the estimator still works for the case of no fixed effects.
+-  `boot[(bootstrap_options)]`: request bootstrap standard errors to be computed.
+   -  if not specified, standard errors correspond to the default from `qmethod()`, except for `mmqreg`, which uses the gls standard errors, as proposed by @mss2019 and @riosavila2024.
+   -  `bootstrap options` are the standard options for the `bootstrap` in Stata, using the same results. 
+- `parallel`: request the estimation of bootstrap standard errors to be performed using `parallel` package (@vegayon2019), based on the specifications given in `bootstrap_options`.
+  - `parallel_cluster(#)` specifies the number of clusters to be used for the parallelization. The default is 2.
+- `seed(#)`: specifies the seed for the random number generator. The default is to use none.
+- `other_options`: Other options are also specific to the `qmethod()` used can also be passed to the command directly.
+
+`mmqreg` specific options are:
+
+- `robust` and `cluster(varname)`: These options are available when using `mmqreg` estimator. They follow the derivations from  @riosavila2024, based on robust and cluster standard errors for gmm estimators. The default are the GLS standard errors.
+- `denopt()`: This option requests alternative options for the estimator of the point density for the residual quantile. See `help qreg`, specifically standard errors `vceopts` section.
+- `dfadj`: Request to adjust the degrees of freedom for the standard errors. The default is to use no adjustment.
+- `ls`: Request displaying the location and scale coefficients. The default is not to display them.
+    
+# Visualization
+
+In addition to the introduction of the `qregfe` command, we also introduce the `qregplot` command. This command allows users to visualize the results of the quantile regression coefficents obtained using the `qregfe` command, as well as other quantile regression commands. It works similarly to the command `grqreg` [@grqreg], but allows for the visualization of coefficients across many quantile regression estimators. The command uses the standard Stata syntax:
+
+`qregplot [indep varlist] ,  quantiles(numlist) cons options`
+
+This command does not work independently. Instead it requires user to first estimate a quantile regression model using any of the standard quantile regression commands (`qreg, bsqreg, sqreg, qreg2, qrprocess`, `qregfe` , etc). Then, calling on the `qregplot` command will identify the general syntax used by the previous command, and estimate the same model across the specified quantiles, storing the point estimates and confidence intervals, which are then used to plot the coefficients across the quantiles. The confidence intervals are estimated at the same level of confidence as the original model. The main options for the command are:
+
+- `indep varlist`: specifies the independent variables to be plotted. The default is to plot all the independent variables coefficients except for the constant. One should use the same names as identified in the coefficients matrix.
+- `quantiles(numlist)`: is the list of quantiles to be plotted. the default is `quantiles(10(5)90)`. 
+- `cons`: request the plotting of the constant term. The default is not to plot it.
+- `ols`: request estimating and plotting of the OLS coefficients along the quantile regression coefficients. The default is not to plot them. When requested, the OLS specification will follow the same specification as the quantile regression model, but will not include the absorbed fixed effects, unless specified using `olsopt()`
+- `olsopt()`: specifies the options to be used for the OLS estimation. All options available for `regress` can be specified here. If one request absorbing fixed effects, the command will use `reghdfe` to estimate the OLS model.
+- `seed(#)`: specifies the seed for the random number generator, so the same seed is used across quantiles. The default is to use none.
+- `label`: Request using variable labels as titles for each coefficient plot. The default is to use variable names.  
+- `labelopt(options)`: Specifies options for labels. Two options are available: `lines(#L)` which requests breaking the labels into `#L` number of lines, default is 1; `maxlength(#K)` requests breaking a label into lines of a max length `#K`. 
+- `mtitles(titles)`: Provides titles for each plot. If not enough titles are provided, the command will use the variable names, or variable labels.
+ 
+Figure design options:
+
+- `raopt(rarea options)`: Specifies options to be used for plotting the Confidence Intervals. The default options are `pstyle(p1) fintenity(30) lwidth(none)`.
+- `lnopt(line options)`: Specifies options to be used for plotting the line of point estimates. The default options are `pstyle(p1) lwidth(0.3)`.
+- `twopt(twoway options)`: Specifies options to be used for the two-way graph that combines the `rarea` and `line` plots. The default option is to set graph and plot region margins to `vsmall`.
+- `graph_combine options`: One can specify any `graph combine` options directly to the command. This will be added on the last step that combines the graphs, and will not affect the individual plots.
+  However, if only one coefficient is plotted, options that are specified directly will affect the two-way plot. 
+
+Storing, saving, and recyling options:
+
+Because the estimation of multiple quantile regression models can be time consuming, the `qregplot` command allows for the storing or saving the results for later use. 
+
+- `estore(name)`: Request storing the results into memory. Similar to `estimates store`.
+- `esave(filename)`: Request saving the results into a `ster` file. Similar to `estimates save`.
+- `from(name)`: Request using the stored results from memory to plot the quantile coefficients. Similar to `estimates restore`. If results were saved to a file, one should first use `est use filename` to load the results into memory, and then store them into memory with a name.
+
+# Illustration
