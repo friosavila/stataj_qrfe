@@ -35,5 +35,5 @@ foreach i in  age tenure ttl_exp not_smsa {
     qregplot `i', from(mcanay) name(mcanay_x, replace) title("Modified Canay")
     qregplot `i', from(mqr) name(mqr_x, replace) title("MMQREG")
     graph combine cre_x canay_x mcanay_x mqr_x, ycommon
-    graph export "qregplot_`i'.pdf", replace 
+    *graph export "qregplot_`i'.pdf", replace 
 }
